@@ -68,7 +68,7 @@ return res.send({ error: false, data: results, message: 'User has been updated s
 });
 }); 
 // set port
-app.listen(3000, function () {
-console.log('Node app is running on port 3000');
+app.listen(process.env.PORT || 5000, function() {
+    console.log("Server started.......");
 });
 module.exports = app;
