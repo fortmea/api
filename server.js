@@ -33,40 +33,18 @@ if (error) throw error;
 return res.send({ error: false, data: results[0], message: 'usuario list.' });
 });
 });
-// Add a new usuario  
-app.post('/usuario', function (req, res) {
-let usuario = req.body.usuario;
-if (!usuario) {
-return res.status(400).send({ error:true, message: 'Please provide usuario' });
-}
-dbConn.query("INSERT INTO usuario SET ? ", { usuario: usuario }, function (error, results, fields) {
-if (error) throw error;
-return res.send({ error: false, data: results, message: 'New usuario has been created successfully.' });
-});
-});
-//  Update usuario with id
-app.put('/usuario', function (req, res) {
-let usuario_id = req.body.usuario_id;
-let usuario = req.body.usuario;
-if (!usuario_id || !usuario) {
-return res.status(400).send({ error: usuario, message: 'Please provide usuario and usuario_id' });
-}
-dbConn.query("UPDATE usuario SET usuario = ? WHERE id = ?", [usuario, usuario_id], function (error, results, fields) {
-if (error) throw error;
-return res.send({ error: false, data: results, message: 'usuario has been updated successfully.' });
-});
-});
-//  Delete usuario
-app.delete('/usuario', function (req, res) {
-let usuario_id = req.body.usuario_id;
-if (!usuario_id) {
-return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
-}
-dbConn.query('DELETE FROM usuario WHERE id = ?', [usuario_id], function (error, results, fields) {
-if (error) throw error;
-return res.send({ error: false, data: results, message: 'usuario has been updated successfully.' });
-});
-}); 
+// Login
+app.get('/usuario/login', function (req, res) {
+    let usuario_nome = req.body.nome;
+    let usuario_senha = req.body.senha;
+    if (!usuario_nome||!usuario_senha) {
+    return res.status(400).send({ error: true, message: 'Please provide name' });
+    }
+    dbConn.query('SELECT * FROM usuario where nome=? and senha=?', usuario_id, usuario_senha, function (error, results, fields) {
+    if (error) throw error;
+    return res.send({ error: false, data: results[0], message: 'usuario list.' });
+    });
+    });
 // set port
 app.listen(process.env.PORT || 5000, function() {
     console.log("Server started.......");
