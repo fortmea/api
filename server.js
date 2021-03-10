@@ -15,56 +15,56 @@ var dbConn = mysql.createConnection({
 });
 // connect to database
 dbConn.connect(); 
-// Retrieve all usuarios 
-app.get('/usuarios', function (req, res) {
-dbConn.query('SELECT * FROM usuarios', function (error, results, fields) {
+// Retrieve all usuario 
+app.get('/usuario', function (req, res) {
+dbConn.query('SELECT * FROM usuario', function (error, results, fields) {
 if (error) throw error;
-return res.send({ error: false, data: results, message: 'usuarios list.' });
+return res.send({ error: false, data: results, message: 'usuario list.' });
 });
 });
-// Retrieve user with id 
-app.get('/user/:id', function (req, res) {
-let user_id = req.params.id;
-if (!user_id) {
-return res.status(400).send({ error: true, message: 'Please provide user_id' });
+// Retrieve usuario with id 
+app.get('/usuario/:id', function (req, res) {
+let usuario_id = req.params.id;
+if (!usuario_id) {
+return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
 }
-dbConn.query('SELECT * FROM usuarios where id=?', user_id, function (error, results, fields) {
+dbConn.query('SELECT * FROM usuario where id=?', usuario_id, function (error, results, fields) {
 if (error) throw error;
-return res.send({ error: false, data: results[0], message: 'usuarios list.' });
+return res.send({ error: false, data: results[0], message: 'usuario list.' });
 });
 });
-// Add a new user  
-app.post('/user', function (req, res) {
-let user = req.body.user;
-if (!user) {
-return res.status(400).send({ error:true, message: 'Please provide user' });
+// Add a new usuario  
+app.post('/usuario', function (req, res) {
+let usuario = req.body.usuario;
+if (!usuario) {
+return res.status(400).send({ error:true, message: 'Please provide usuario' });
 }
-dbConn.query("INSERT INTO usuarios SET ? ", { user: user }, function (error, results, fields) {
+dbConn.query("INSERT INTO usuario SET ? ", { usuario: usuario }, function (error, results, fields) {
 if (error) throw error;
-return res.send({ error: false, data: results, message: 'New user has been created successfully.' });
+return res.send({ error: false, data: results, message: 'New usuario has been created successfully.' });
 });
 });
-//  Update user with id
-app.put('/user', function (req, res) {
-let user_id = req.body.user_id;
-let user = req.body.user;
-if (!user_id || !user) {
-return res.status(400).send({ error: user, message: 'Please provide user and user_id' });
+//  Update usuario with id
+app.put('/usuario', function (req, res) {
+let usuario_id = req.body.usuario_id;
+let usuario = req.body.usuario;
+if (!usuario_id || !usuario) {
+return res.status(400).send({ error: usuario, message: 'Please provide usuario and usuario_id' });
 }
-dbConn.query("UPDATE usuarios SET user = ? WHERE id = ?", [user, user_id], function (error, results, fields) {
+dbConn.query("UPDATE usuario SET usuario = ? WHERE id = ?", [usuario, usuario_id], function (error, results, fields) {
 if (error) throw error;
-return res.send({ error: false, data: results, message: 'user has been updated successfully.' });
+return res.send({ error: false, data: results, message: 'usuario has been updated successfully.' });
 });
 });
-//  Delete user
-app.delete('/user', function (req, res) {
-let user_id = req.body.user_id;
-if (!user_id) {
-return res.status(400).send({ error: true, message: 'Please provide user_id' });
+//  Delete usuario
+app.delete('/usuario', function (req, res) {
+let usuario_id = req.body.usuario_id;
+if (!usuario_id) {
+return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
 }
-dbConn.query('DELETE FROM usuarios WHERE id = ?', [user_id], function (error, results, fields) {
+dbConn.query('DELETE FROM usuario WHERE id = ?', [usuario_id], function (error, results, fields) {
 if (error) throw error;
-return res.send({ error: false, data: results, message: 'User has been updated successfully.' });
+return res.send({ error: false, data: results, message: 'usuario has been updated successfully.' });
 });
 }); 
 // set port
