@@ -35,8 +35,8 @@ return res.send({ error: false, data: results[0], message: 'usuario list.' });
 });
 // Login
 app.get('/usuario/login', function (req, res) {
-    let usuario_nome = req.body.nome;
-    let usuario_senha = req.body.senha;
+    let usuario_nome = req.params.nome;
+    let usuario_senha = req.params.senha;
     if (!usuario_nome||!usuario_senha) {
     return res.status(400).send({ error: true, message: 'Please provide name' });
     }
