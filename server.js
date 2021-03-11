@@ -43,7 +43,7 @@ app.use((req, res, next) => {
     })*/
 app.post('/usuario/', function (req, res) {
 let usuario_id = req.body.id;
-console.log(usuario_id)
+//console.log(usuario_id)
 if (!usuario_id) {
 return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
 }
