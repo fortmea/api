@@ -43,6 +43,7 @@ app.use((req, res, next) => {
     })*/
 app.post('/usuario/', function (req, res) {
 let usuario_id = req.body.id;
+console.log(usuario_id)
 if (!usuario_id) {
 return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
 }
@@ -55,7 +56,7 @@ return res.send({ error: false, data: results[0], message: 'Ok.' });
 app.post('/login/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_senha = req.body.senha;
-    console.log("Parametros: "+JSON.stringify(req.body)+"       ");
+    //console.log("Parametros: "+JSON.stringify(req.body)+"       ");
     if ((!usuario_nome) || (!usuario_senha)) {
     return res.status(400).send({ error: true, message: 'Please provide name' });
     }
