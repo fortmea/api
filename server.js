@@ -28,7 +28,7 @@ return res.send({ error: false, data: results, message: 'usuario list.' });
 });*/
 // Retrieve usuario with id 
 app.use((req, res, next) => {
-    let validIps = ['::12', '127.0.0.1','::1','68.183.126.19']; // Put your IP whitelist in this array
+    let validIps = ['::12', '127.0.0.1','::1','68.183.126.19','10.5.241.183']; // Put your IP whitelist in this array
     
       if(validIps.includes(req.socket.remoteAddress)){
           // IP is ok, so go on
