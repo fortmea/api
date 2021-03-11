@@ -25,11 +25,10 @@ dbConn.query('SELECT * FROM usuario', function (error, results, fields) {
 if (error) throw error;
 return res.send({ error: false, data: results, message: 'usuario list.' });
 });
-});*/
+});
 // Retrieve usuario with id 
 app.use((req, res, next) => {
-    let validIps = ['::12', '127.0.0.1','::1','68.183.126.19']; // Put your IP whitelist in this array
-        console.log(req.url);
+    let validIps = ['::12', '127.0.0.1','::1','68.183.126.19','']; // Put your IP whitelist in this array
       if(validIps.includes(req.socket.remoteAddress)){
           // IP is ok, so go on
           console.log("IP "+req.socket.remoteAddress+" ok");
@@ -37,11 +36,11 @@ app.use((req, res, next) => {
       }
       else{
           // Invalid ip
-          console.log("Bad IP: " + req.connection.remoteAddress);
-          const err = new Error("Bad IP: " + req.connection.remoteAddress);
+          console.log("Bad IP: " + req.socket.remoteAddress);
+          const err = new Error("Bad IP: " + req.socket.remoteAddress);
           next(err);
       }
-    })
+    })*/
 app.post('/usuario/', function (req, res) {
 let usuario_id = req.body.id;
 if (!usuario_id) {
