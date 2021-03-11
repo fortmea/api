@@ -1,8 +1,10 @@
 var express = require('express');
 var app = express();
 var mysql = require('mysql');
+var cors = require('cors')
 //var qs = require('querystring');
 app.use(express.urlencoded({extended:true}));
+app.use(cors());
 // default route
 app.get('/', function (req, res) {
 return res.send({ error: true, message: 'hello' })
