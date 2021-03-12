@@ -49,14 +49,14 @@ return res.status(400).send({ error: true, message: 'Please provide usuario_id' 
 }
 dbConn.query('SELECT * FROM usuario where id=?', usuario_id, function (error, results, fields) {
 if (error) throw error;
-return res.send({ error: false, data: results[0] });
+return res.send({ error: false, data: results[0], message: 'Ok.' });
 });
 });
 app.post('/post/', function (req, res) {
 
     dbConn.query('SELECT * FROM post', function (error, results, fields) {
     if (error) throw error;
-    return res.send({ error: false, data: results, message: 'Ok.' });
+    return res.send({ error: false, data: results });
     });
     });
 // Login
