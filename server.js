@@ -59,6 +59,20 @@ app.post('/post/', function (req, res) {
     return res.send({ error: false, data: results });
     });
     });
+app.post('/addpost/', function (req, res) {
+    let autor = req.body.id;
+    let conteudo = req.body.conteudo;
+    let nome = req.body.titulo;
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.getMonth();
+    const year = today.getFullYear();  
+    var dataf = year +'-'+(month+1)+'-'+day;
+    dbConn.query('INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`) Values(`'+nome+'`,`'+conteudo+'`,`'+dataf+'`,`'+autor+'`)', function (error, results, fields) {
+    if (error) throw error;
+    return res.send({ error: false});
+    });
+});
 // Login
 app.post('/login/', function (req, res) {
     let usuario_nome = req.body.nome;
