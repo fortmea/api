@@ -54,7 +54,7 @@ return res.send({ error: false, data: results[0], message: 'Ok.' });
 });
 });
 app.post('/post/', function (req, res) {
-
+    
     dbConn.query('SELECT * FROM post', function (error, results, fields) {
     if (error) throw error;
     return res.send({ error: false, data: results });
