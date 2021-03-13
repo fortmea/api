@@ -68,7 +68,10 @@ app.post('/addpost/', function (req, res) {
     const month = today.getMonth();
     const year = today.getFullYear();  
     var dataf = year +'-'+(month+1)+'-'+day;
-    dbConn.query('INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`) Values(`'+nome+'`,`'+conteudo+'`,`'+dataf+'`,`'+autor+'`)', function (error, results, fields) {
+    var query = 'INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`) Values("'+nome+'","'+conteudo+'","'+dataf+'","'+autor+'")';
+    console.log(query);
+    dbConn.query(query, function (error, results, fields) {
+    
     if (error) throw error;
     return res.send({ error: false});
     });
