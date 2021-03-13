@@ -42,6 +42,7 @@ app.use((req, res, next) => {
       }
     })*/
 app.post('/usuario/', function (req, res) {
+    console.log(req.body);
 let usuario_id = req.body.id;
 //console.log(usuario_id)
 if (!usuario_id) {
