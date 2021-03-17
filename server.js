@@ -7,6 +7,7 @@ const session = require('express-session');
 const redis = require('redis');
 const redisStore = require('connect-redis')(session);
 const client  = redis.createClient();
+const router = express.Router();
 //var qs = require('querystring');
 app.use(express.urlencoded({extended:true}));
 app.use(cors());
@@ -42,7 +43,7 @@ app.use(session({
           next(err);
       }
     })*/
-app.post('/login',(req,res) => {
+router.post('/login',(req,res) => {
     let usuario_email = req.body.email;
     var usuario_nome;
     var usuario_timestamp;
@@ -69,7 +70,7 @@ app.post('/login',(req,res) => {
     }
     
 });
-app.post('/usuario/', function (req, res) {
+router.post('/usuario/', function (req, res) {
     console.log(req.body);
 let usuario_id = req.body.id;
 //console.log(usuario_id)
@@ -81,14 +82,14 @@ if (error) throw error;
 return res.send({ error: false, data: results[0], message: 'Ok.' });
 });
 });
-app.post('/post/', function (req, res) {
+router.post('/post/', function (req, res) {
     
     dbConn.query('SELECT * FROM post ORDER BY id DESC', function (error, results, fields) {
     if (error) throw error;
     return res.send({ error: false, data: results });
     });
     });
-app.post('/addpost/', function (req, res) {
+router.post('/addpost/', function (req, res) {
     let autor = req.body.id;
     let conteudo = req.body.conteudo;
     let nome = req.body.titulo;
@@ -106,7 +107,7 @@ app.post('/addpost/', function (req, res) {
     });
 });
 // Login
-app.post('/gerarhash/', function (req, res) {
+router.post('/gerarhash/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_email = req.body.email;
     var str = usuario_nome+usuario_email;
@@ -128,7 +129,7 @@ app.post('/gerarhash/', function (req, res) {
     });
     });
 
-app.post('/login/', function (req, res) {
+router.post('/login/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_senha = req.body.senha;
     //console.log("Parametros: "+JSON.stringify(req.body)+"       ");
