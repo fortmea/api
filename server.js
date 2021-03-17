@@ -144,6 +144,7 @@ router.post('/login/', function (req, res) {
     });
 });
 // set port
+app.use('/', router);
 app.listen(process.env.PORT || 5000, function() {
     console.log("Server started.......");
 });
