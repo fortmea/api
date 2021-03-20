@@ -43,12 +43,12 @@ dbConn.connect();
           next(err);
       }
     })*/
-app.post('/login',(req,res) => {
+app.post('/login/',(req,res) => {
     let usuario_email = req.body.email;
     var usuario_nome;
     var usuario_timestamp;
     var usuario_foto;
-    dbConn.query('SELECT * FROM `usuario` where `email`="'+usuario_email+'"', function (error, results, fields) {
+    dbConn.query('SELECT * FROM `usuario` where `email`=?',+usuario_email, function (error, results, fields) {
         if (error) throw error;
         usuario_nome = results[0].nome;
         usuario_timestamp = results[0].date;
