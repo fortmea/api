@@ -50,9 +50,11 @@ app.post('/login/',(req,res) => {
     var usuario_foto;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
         if (error) throw error;
+        if(results){
         usuario_nome = results[0].nome;
         usuario_timestamp = results[0].date;
         usuario_foto = results[0].image||null;
+    }
         });
     var str = usuario_nome+usuario_email;
     var datb = usuario_timestamp+str;
@@ -64,8 +66,10 @@ app.post('/login/',(req,res) => {
         req.session.email = req.body.email;
         req.session.nome = usuario_nome;
         req.session.foto = usuario_foto;
+        console.log('Login successful');
         res.end('Pronto!');
     }else{
+        console.log("Login error!");
         res.end('Erro, usuário não encontrado');
     }
     
