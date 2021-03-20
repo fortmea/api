@@ -50,7 +50,7 @@ app.post('/login/',(req,res) => {
     var usuario_foto;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
         if (error) throw error;
-        if(results[0].nome){
+        if(results[0]){
         usuario_nome = results[0].nome;
         usuario_timestamp = results[0].date;
         usuario_foto = results[0].image||null;
