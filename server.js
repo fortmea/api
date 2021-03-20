@@ -48,7 +48,7 @@ app.post('/login',(req,res) => {
     var usuario_nome;
     var usuario_timestamp;
     var usuario_foto;
-    dbConn.query('SELECT * FROM usuario where email=?', usuario_email, function (error, results, fields) {
+    dbConn.query('SELECT * FROM usuario where email='+usuario_email, function (error, results, fields) {
         if (error) throw error;
         usuario_nome = results[0].nome;
         usuario_timestamp = results[0].date;
