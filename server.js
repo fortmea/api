@@ -67,10 +67,10 @@ app.post('/login/',(req,res) => {
         req.session.nome = usuario_nome;
         req.session.foto = usuario_foto;
         console.log('Login successful');
-        res.end('Pronto!');
+        res.send({error: 'false',data:'Logado com sucesso!'});
     }else{
         console.log("Login error!");
-        res.end('Erro, usuário não encontrado');
+        res.send({error:'true',data:'Erro no login!'});
     }
     
 });
