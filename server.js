@@ -153,6 +153,13 @@ app.post('/register/', function (req, res) {
     }else if((!usuario_email)){
         return res.status(400).send({ error: true, message:'informe um email'});
     }
+    var queryv = "SELECT * FROM `usuario` WHERE email='"+usuario_email+"'";
+    dbConn.query(queryv, function(error, results, fields){
+    if (error) throw error;
+    if(results[0]){
+        return res.send({ error: true, data: "Usuário já existe!"});
+    }
+    });
     var querys = "INSERT INTO usuario(`nome`,`email`,`date`) values('"+usuario_nome+ "','"+usuario_email+"','"+time+"') ";
     dbConn.query(querys, function (error){
     if (error) throw error;
