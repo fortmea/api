@@ -70,7 +70,7 @@ app.post('/login/',(req,res) => {
         res.send({error: 'false',data:'Logado com sucesso!'});
     }else{
         console.log("Login error!");
-        res.send({error:'true',data:'Erro no login!'});
+        res.status(400).send({error:'true',data:'Erro no login!'});
     }
     
 });
@@ -111,7 +111,7 @@ app.post('/addpost/', function (req, res) {
     });
 });
 // Login
-app.post('/gerarhash/', function (req, res) {
+app.post('/register/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_email = req.body.email;
     var str = usuario_nome+usuario_email;
