@@ -45,33 +45,40 @@ dbConn.connect();
     })*/
 app.post('/login/',(req,res) => {
     let usuario_email = req.body.email;
+    let usuario_hash = req.body.hash;
     var usuario_nome;
     var usuario_timestamp;
     var usuario_foto;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
         if (error) throw error;
-        if(results[0]){
+        if(results){
         usuario_nome = results[0].nome;
         usuario_timestamp = results[0].date;
         usuario_foto = results[0].image||null;
+        console.log(usuario_timestamp);
+        var str = usuario_nome+usuario_email;
+        var datb = usuario_timestamp+str;
+        const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
+        const md5Hasher = crypto.createHmac("md5", secret);
+        const hash =  md5Hasher.update(datb).digest("hex");
+        console.log(hash);
+     
+        if(hash==usuario_hash){
+            //req.session.email = req.body.email;
+            //req.session.nome = usuario_nome;
+            //req.session.foto = usuario_foto;
+            console.log('Login successful');
+            res.send({error: 'false',data:'Logado com sucesso!'});
+        }else{
+            console.log("Login error!");
+            res.send({error:'true',data:'Erro no login!'});
+        }
+    }else{
+        res.send({error:'true',data:'usuário não encontrado!'})
     }
         });
-    var str = usuario_nome+usuario_email;
-    var datb = usuario_timestamp+str;
-    const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
-    const md5Hasher = crypto.createHmac("md5", secret);
-    const hash =  md5Hasher.update(datb).digest("hex");
- 
-    if(hash==req.body.hash){
-        req.session.email = req.body.email;
-        req.session.nome = usuario_nome;
-        req.session.foto = usuario_foto;
-        console.log('Login successful');
-        res.send({error: 'false',data:'Logado com sucesso!'});
-    }else{
-        console.log("Login error!");
-        res.status(400).send({error:'true',data:'Erro no login!'});
-    }
+        
+
     
 });
 app.post('/usuario/', function (req, res) {
@@ -132,21 +139,6 @@ app.post('/register/', function (req, res) {
         return res.send({ error: false, data: hash,message:"Ok."});
     });
     });
-
-app.post('/login/', function (req, res) {
-    let usuario_nome = req.body.nome;
-    let usuario_senha = req.body.hash;
-    //console.log("Parametros: "+JSON.stringify(req.body)+"       ");
-    if ((!usuario_nome) || (!usuario_senha)) {
-    return res.status(400).send({ error: true, message: 'Please provide name' });
-    }
-    var querys = "SELECT * FROM usuario where nome='"+usuario_nome+ "' and senha='"+usuario_senha+"' ";
-    //console.log(querys);
-    dbConn.query(querys, function (error, results, fields) {
-    if (error) throw error;
-    return res.send({ error: false, data: results,message:"Ok."});
-    });
-});
 // set port
 //app.use('/', router);
 app.listen(process.env.PORT || 5000, function() {
