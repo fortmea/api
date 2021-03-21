@@ -9,6 +9,7 @@ const redisStore = require('connect-redis')(session);
 const client  = redis.createClient();
 const router = express.Router();*/
 //var qs = require('querystring');
+const nodemailer = require('nodemailer');
 app.use(express.urlencoded({extended:true}));
 app.use(cors());
 app.get('/', function (req, res) {
@@ -158,13 +159,40 @@ app.post('/register/', function (req, res) {
     if (error) throw error;
     if(results[0]){
         return res.send({ error: true, data: "Usuário já existe!"});
+    }else{
+        var querys = "INSERT INTO usuario(`nome`,`email`,`date`) values('"+usuario_nome+ "','"+usuario_email+"','"+time+"') ";
+        dbConn.query(querys, function (error){
+        if (error) throw error;
+        let transporter = nodemailer.createTransport({
+            host: 'mail.piroca.ninja', // <= your smtp server here
+            port: 465, // <= connection port
+            secure: true, // use SSL or not
+            auth: {
+               user: 'suporte', // <= smtp login user
+               pass: 'suportesuporte' // <= smtp login pass
+            }
+         });
+         
+         let mailOptions = {
+            from: "suporte@joaowalteramadeu.me", // <= should be verified and accepted by service provider. ex. 'youremail@gmail.com'
+            to: usuario_email, // <= recepient email address. ex. 'friendemail@gmail.com'
+            subject: "Confirme seu endereço de email", // <= email subject ex. 'Test email'
+            //text: emailData.text, // <= for plain text emails. ex. 'Hello world'
+            html:"<p>Olá, "+usuario_nome+"!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='joaowalteramadeu.me/confirmar.html'>Confirmar</a>" // <= for html templated emails
+         };
+         
+         // send mail with defined transport object
+         transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+               return console.log(error.message);
+            }
+            console.log('Message sent: %s', info.messageId);
+         });
+            return res.send({ error: false, data: hash,message:"Ok."});
+        });
     }
     });
-    var querys = "INSERT INTO usuario(`nome`,`email`,`date`) values('"+usuario_nome+ "','"+usuario_email+"','"+time+"') ";
-    dbConn.query(querys, function (error){
-    if (error) throw error;
-        return res.send({ error: false, data: hash,message:"Ok."});
-    });
+    
     });
 app.listen(process.env.PORT || 5000, function() {
     console.log("Server started.......");
