@@ -135,7 +135,7 @@ app.post('/register/', function (req, res) {
 
 app.post('/login/', function (req, res) {
     let usuario_nome = req.body.nome;
-    let usuario_senha = req.body.senha;
+    let usuario_senha = req.body.hash;
     //console.log("Parametros: "+JSON.stringify(req.body)+"       ");
     if ((!usuario_nome) || (!usuario_senha)) {
     return res.status(400).send({ error: true, message: 'Please provide name' });
