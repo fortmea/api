@@ -129,13 +129,13 @@ app.post('/addpost/', function (req, res) {
         if (error) {
             throw error;
         }
-            return res.send({ error: false,data:"Post adicionado com sucesso!"});
+            return res.send({ error: 'false',data:"Post adicionado com sucesso!"});
         })
 }else{
-    return res.send({ error: true,data:"Informações de login incorretas!"});
+    return res.send({ error: 'true',data:"Informações de login incorretas!"});
 }
 }else{
-    return res.send({ error: true,data:"Usuário não encontrado!"});
+    return res.send({ error: 'true',data:"Usuário não encontrado!"});
 }})
 });
 app.post('/register/', function (req, res) {
