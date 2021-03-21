@@ -11,11 +11,9 @@ const router = express.Router();*/
 //var qs = require('querystring');
 app.use(express.urlencoded({extended:true}));
 app.use(cors());
-// default route
 app.get('/', function (req, res) {
 return res.send({ error: true, message: 'hello' })
 });
-// connection configurations
 var dbConn = mysql.createConnection({
     host: '68.183.126.19',
     user: 'joaoi',
@@ -42,7 +40,8 @@ dbConn.connect();
           const err = new Error("Bad IP: " + req.socket.remoteAddress);
           next(err);
       }
-    })*/
+    })
+    
 app.post('/login/',(req,res) => {
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
@@ -76,14 +75,10 @@ app.post('/login/',(req,res) => {
         res.send({error:'true',data:'usuário não encontrado!'})
     }
         });
-        
-
-    
-});
+});*/
 app.post('/usuario/', function (req, res) {
     console.log(req.body);
 let usuario_id = req.body.id;
-//console.log(usuario_id)
 if (!usuario_id) {
 return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
 }
@@ -100,23 +95,49 @@ app.post('/post/', function (req, res) {
     });
     });
 app.post('/addpost/', function (req, res) {
-    let autor = req.body.id;
-    let conteudo = req.body.conteudo;
-    let nome = req.body.titulo;
-    const today = new Date();
-    const day = today.getDate();
-    const month = today.getMonth();
-    const year = today.getFullYear();  
-    var dataf = year +'-'+(month+1)+'-'+day;
-    var query = 'INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`) Values("'+nome+'","'+conteudo+'","'+dataf+'","'+autor+'")';
-    console.log(query);
-    dbConn.query(query, function (error, results, fields) {
-    
-    if (error) throw error;
-    return res.send({ error: false});
-    });
+    let usuario_email = req.body.email;
+    let usuario_hash = req.body.hash;
+    var usuario_nome;
+    var usuario_timestamp;
+    var usuario_foto;
+    dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
+        if (error) throw error;
+            if(results[0]){
+                usuario_nome = results[0].nome;
+                usuario_timestamp = results[0].date;
+                usuario_foto = results[0].image||null;
+                console.log(usuario_timestamp);
+                var str = usuario_nome+usuario_email;
+                var datb = usuario_timestamp+str;
+                const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
+                const md5Hasher = crypto.createHmac("md5", secret);
+                const hash =  md5Hasher.update(datb).digest("hex");
+                console.log(hash);
+            if(hash==usuario_hash){
+                let autor = results[0].id;
+                let conteudo = req.body.conteudo;
+                let nome = req.body.titulo;
+                let subtitulo = req.body.subtitulo;
+                const today = new Date();
+                const day = today.getDate();
+                const month = today.getMonth();
+                const year = today.getFullYear();  
+                var dataf = year +'-'+(month+1)+'-'+day;
+                var query = 'INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values("'+nome+'","'+conteudo+'","'+dataf+'","'+autor+',"'+subtitulo+'"")';
+                console.log(query);
+                dbConn.query(query, function (error, results, fields) {
+        if (error) {
+            throw error;
+        }
+            return res.send({ error: false,data:"Post adicionado com sucesso!"});
+        })
+}else{
+    return res.send({ error: true,data:"Informações de login incorretas!"});
+}
+}else{
+    return res.send({ error: true,data:"Usuário não encontrado!"});
+}})
 });
-// Login
 app.post('/register/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_email = req.body.email;
@@ -138,8 +159,6 @@ app.post('/register/', function (req, res) {
         return res.send({ error: false, data: hash,message:"Ok."});
     });
     });
-// set port
-//app.use('/', router);
 app.listen(process.env.PORT || 5000, function() {
     console.log("Server started.......");
 });
