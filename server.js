@@ -28,9 +28,9 @@ dbConn.connect();
     store: new redisStore({ host: 'localhost', port: 6379, client: client,ttl : 260}),
     saveUninitialized: false,
     resave: false
-}));
-/* app.use((req, res, next) => {
-    let validIps = ['::12', '127.0.0.1','::1','68.183.126.19','']; // Put your IP whitelist in this array
+}));*/
+ app.use((req, res, next) => {
+    let validIps = ['::12', '127.0.0.1','::1','68.183.126.19']; // Put your IP whitelist in this array
       if(validIps.includes(req.socket.remoteAddress)){
           // IP is ok, so go on
           console.log("IP "+req.socket.remoteAddress+" ok");
@@ -42,7 +42,7 @@ dbConn.connect();
           const err = new Error("Bad IP: " + req.socket.remoteAddress);
           next(err);
       }
-    })*/
+    })
 app.post('/login/',(req,res) => {
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
