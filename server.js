@@ -207,12 +207,12 @@ app.post('/register/', function (req, res) {
         dbConn.query(querys, function (error){
         if (error) throw error;
         let transporter = nodemailer.createTransport({
-            host: 'mail.piroca.ninja', // <= your smtp server here
-            port: 465, // <= connection port
-            secure: true, // use SSL or not
+            host: 'mail.piroca.ninja',
+            port: 465, 
+            secure: true, 
             auth: {
-               user: 'suporte', // <= smtp login user
-               pass: 'suportesuporte' // <= smtp login pass
+               user: 'suporte',
+               pass: 'suportesuporte' 
             }
          });
          
