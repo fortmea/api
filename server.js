@@ -77,16 +77,22 @@ app.post('/login/',(req,res) => {
     }
         });
 });*/
+
+
+
+//procurar nome de usuário por ID
 app.post('/usuario/', function (req, res) {
 let usuario_id = req.body.id;
 if (!usuario_id) {
-return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
+return res.status(400).send({ error: true, message: 'Informe um nome de usuário!' });
 }
 dbConn.query('SELECT `nome` FROM usuario where id=?', usuario_id, function (error, results, fields) {
 if (error) throw error;
 return res.send({ error: false, data: results[0], message: 'Ok.' });
 });
 });
+
+//Carregar postagens
 app.post('/post/', function (req, res) {
     
     dbConn.query('SELECT * FROM post ORDER BY id DESC', function (error, results, fields) {
@@ -142,12 +148,15 @@ app.post('/addpost/', function (req, res) {
     return res.send({ error: 'true',data:"Usuário não encontrado!"});
 }})
 });
+
+
+//confirmar conta de usuário
 app.post('/confirmar/',function(req,res){
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
+    if((usuario_email)&&(usuario_hash)){
     var usuario_nome;
     var usuario_timestamp;
-    var usuario_foto;
     var usuario_confirmado;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
         if (error) throw error;
@@ -181,7 +190,13 @@ app.post('/confirmar/',function(req,res){
     return res.send({ error: 'true',data:"Usuário não encontrado!"});
 }
 });
+}else{
+    return res.send({ error: 'true',data:"Informe nome de usuário e email!"});
+}
 });
+
+
+//registrar novo usuário
 app.post('/register/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_email = req.body.email;
@@ -234,9 +249,9 @@ app.post('/register/', function (req, res) {
             return res.send({ error: false, data: hash,message:"Ok."});
         });
     }
-    });
-    
-    });
+    });    
+});
+
 app.listen(process.env.PORT || 5000, function() {
     console.log("Server started.......");
 });
