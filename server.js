@@ -101,12 +101,14 @@ app.post('/addpost/', function (req, res) {
     var usuario_nome;
     var usuario_timestamp;
     var usuario_foto;
+    var usuario_confirmado;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
         if (error) throw error;
             if(results[0]){
                 usuario_nome = results[0].nome;
                 usuario_timestamp = results[0].date;
                 usuario_foto = results[0].image||null;
+                usuario_confirmado = results[0].confirmado;
                 console.log(usuario_timestamp);
                 var str = usuario_nome+usuario_email;
                 var datb = usuario_timestamp+str;
@@ -114,7 +116,8 @@ app.post('/addpost/', function (req, res) {
                 const md5Hasher = crypto.createHmac("md5", secret);
                 const hash =  md5Hasher.update(datb).digest("hex");
                 console.log(hash);
-            if(hash==usuario_hash){
+                if(usuario_confirmado==1){
+            if((hash==usuario_hash)){
                 let autor = results[0].id;
                 let conteudo = req.body.conteudo;
                 let nome = req.body.titulo;
@@ -125,7 +128,6 @@ app.post('/addpost/', function (req, res) {
                 const year = today.getFullYear();  
                 var dataf = year +'-'+(month+1)+'-'+day;
                 var query = 'INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values("'+nome+'","'+conteudo+'","'+dataf+'","'+autor+'","'+subtitulo+'")';
-                console.log(query);
                 dbConn.query(query, function (error, results, fields) {
         if (error) {
             throw error;
@@ -136,8 +138,50 @@ app.post('/addpost/', function (req, res) {
     return res.send({ error: 'true',data:"Informações de login incorretas!"});
 }
 }else{
+    return res.send({ error: 'true',data:"Usuário não confirmado. Por favor, verifique seu email e tente novamente!"});
+}
+}else{
     return res.send({ error: 'true',data:"Usuário não encontrado!"});
 }})
+});
+app.post('/confirmar/',function(req,res){
+    let usuario_email = req.body.email;
+    let usuario_hash = req.body.hash;
+    var usuario_nome;
+    var usuario_timestamp;
+    var usuario_foto;
+    var usuario_confirmado;
+    dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
+        if (error) throw error;
+            if(results[0]){
+                usuario_nome = results[0].nome;
+                usuario_timestamp = results[0].date;
+                usuario_confirmado = results[0].confirmado;
+                console.log(usuario_timestamp);
+                var str = usuario_nome+usuario_email;
+                var datb = usuario_timestamp+str;
+                const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
+                const md5Hasher = crypto.createHmac("md5", secret);
+                const hash =  md5Hasher.update(datb).digest("hex");
+                console.log(hash);
+                if(usuario_confirmado==0){
+            if((hash==usuario_hash)){
+                let usuario_id = results[0].id;
+                var query = 'UPDATE `db_web`.`usuario` SET `confirmado`="1" WHERE  `id`="'+usuario_id+'"';
+                dbConn.query(query, function (error, results, fields) {
+        if (error) {
+            throw error;
+        }
+            return res.send({ error: 'false',data:"Usuário confirmado com sucesso!"});
+        })
+}
+}else{
+    return res.send({ error: 'true',data:"Usuário já confirmado!"});
+}
+}else{
+    return res.send({ error: 'true',data:"Usuário não encontrado!"});
+}
+});
 });
 app.post('/register/', function (req, res) {
     let usuario_nome = req.body.nome;
@@ -174,11 +218,11 @@ app.post('/register/', function (req, res) {
          });
          
          let mailOptions = {
-            from: "suporte@joaowalteramadeu.me", // <= should be verified and accepted by service provider. ex. 'youremail@gmail.com'
-            to: usuario_email, // <= recepient email address. ex. 'friendemail@gmail.com'
-            subject: "Confirme seu endereço de email", // <= email subject ex. 'Test email'
-            //text: emailData.text, // <= for plain text emails. ex. 'Hello world'
-            html:"<p>Olá, "+usuario_nome+"!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='joaowalteramadeu.me/confirmar.html'>Confirmar</a>" // <= for html templated emails
+            from: "suporte@joaowalteramadeu.me", 
+            to: usuario_email, 
+            subject: "Confirme seu endereço de email", 
+            //text: emailData.text,
+            html:"<p>Olá, "+usuario_nome+"!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='joaowalteramadeu.me/confirmar.html'>Confirmar</a>" 
          };
          
          // send mail with defined transport object
@@ -188,7 +232,7 @@ app.post('/register/', function (req, res) {
             }
             console.log('Message sent: %s', info.messageId);
          });
-            return res.send({ error: false, data: hash,message:"Ok."});
+            return res.send({ error: false, data: hash+"<br>Confirme seu email!",message:"Ok."});
         });
     }
     });
