@@ -174,6 +174,8 @@ app.post('/confirmar/',function(req,res){
         }
             return res.send({ error: 'false',data:"Usuário confirmado com sucesso!"});
         })
+}else{
+    return res.send({ error: 'true',data:"Código hash incorreto!"});
 }
 }else{
     return res.send({ error: 'true',data:"Usuário já confirmado!"});
@@ -232,7 +234,7 @@ app.post('/register/', function (req, res) {
             }
             console.log('Message sent: %s', info.messageId);
          });
-            return res.send({ error: false, data: hash+"<br>Confirme seu email!",message:"Ok."});
+            return res.send({ error: false, data: hash,message:"Ok."});
         });
     }
     });
