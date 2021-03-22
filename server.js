@@ -78,7 +78,6 @@ app.post('/login/',(req,res) => {
         });
 });*/
 app.post('/usuario/', function (req, res) {
-    console.log(req.body);
 let usuario_id = req.body.id;
 if (!usuario_id) {
 return res.status(400).send({ error: true, message: 'Please provide usuario_id' });
@@ -115,7 +114,6 @@ app.post('/addpost/', function (req, res) {
                 const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
                 const md5Hasher = crypto.createHmac("md5", secret);
                 const hash =  md5Hasher.update(datb).digest("hex");
-                console.log(hash);
                 if(usuario_confirmado==1){
             if((hash==usuario_hash)){
                 let autor = results[0].id;
@@ -163,7 +161,6 @@ app.post('/confirmar/',function(req,res){
                 const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
                 const md5Hasher = crypto.createHmac("md5", secret);
                 const hash =  md5Hasher.update(datb).digest("hex");
-                console.log(hash);
                 if(usuario_confirmado==0){
             if((hash==usuario_hash)){
                 let usuario_id = results[0].id;
