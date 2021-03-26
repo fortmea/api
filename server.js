@@ -123,7 +123,7 @@ app.post('/addpost/', function (req, res) {
                 const hash =  md5Hasher.update(datb).digest("hex");
                 if(usuario_confirmado==1){
                     if(usuario_level!=1){
-                        return res.send({error:'true',data:"Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em mailto:suporte@piroca.ninja."});
+                        return res.send({error:'true',data:"Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@piroca.ninja'>suporte@piroca.ninja</a> ou <a href='mailto:joao@piroca.ninja'>joao@piroca.ninja</a>."});
                     }else{
             if((hash==usuario_hash)){
                 let autor = results[0].id;
