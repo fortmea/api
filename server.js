@@ -114,6 +114,7 @@ app.post('/addpost/', function (req, res) {
                 usuario_timestamp = results[0].date;
                 usuario_foto = results[0].image||null;
                 usuario_confirmado = results[0].confirmado;
+                usuario_level = results[0].level;
                 console.log(usuario_timestamp);
                 var str = usuario_nome+usuario_email;
                 var datb = usuario_timestamp+str;
@@ -121,6 +122,9 @@ app.post('/addpost/', function (req, res) {
                 const md5Hasher = crypto.createHmac("md5", secret);
                 const hash =  md5Hasher.update(datb).digest("hex");
                 if(usuario_confirmado==1){
+                    if(usuario_level!=1){
+                        return res.send({error:'true',data:"Usuário não tem permissão para fazer publicação!"});
+                    }else{
             if((hash==usuario_hash)){
                 let autor = results[0].id;
                 let conteudo = req.body.conteudo;
@@ -140,6 +144,7 @@ app.post('/addpost/', function (req, res) {
         })
 }else{
     return res.send({ error: 'true',data:"Informações de login incorretas!"});
+}
 }
 }else{
     return res.send({ error: 'true',data:"Usuário não confirmado. Por favor, verifique seu email e tente novamente!"});
@@ -164,6 +169,7 @@ app.post('/confirmar/',function(req,res){
                 usuario_nome = results[0].nome;
                 usuario_timestamp = results[0].date;
                 usuario_confirmado = results[0].confirmado;
+
                 console.log(usuario_timestamp);
                 var str = usuario_nome+usuario_email;
                 var datb = usuario_timestamp+str;
@@ -236,7 +242,7 @@ app.post('/register/', function (req, res) {
             to: usuario_email, 
             subject: "Confirme seu endereço de email", 
             //text: emailData.text,
-            html:"<p>Olá, "+usuario_nome+"!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='joaowalteramadeu.me/confirmar.html'>Confirmar</a>" 
+            html:"<p>Olá, "+usuario_nome+"!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='https://joaowalteramadeu.me/confirmar.html'>Confirmar</a>" 
          };
          
          // send mail with defined transport object
