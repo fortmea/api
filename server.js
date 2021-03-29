@@ -238,7 +238,7 @@ app.post('/register/', function (req, res) {
          });
          
          let mailOptions = {
-            from: "suporte@joaowalteramadeu.me", 
+            from: '"Suporte - Contas" <suporte@piroca.ninja>', 
             to: usuario_email, 
             subject: "Confirme seu endereço de email", 
             //text: emailData.text,
