@@ -19,6 +19,6 @@
     "start": "node server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "github.com/fortmea",
   "license": "ISC"
 }
