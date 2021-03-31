@@ -126,18 +126,14 @@ app.post('/addpost/', function (req, res) {
                         return res.send({error:'true',data:"Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@piroca.ninja'>suporte@piroca.ninja</a> ou <a href='mailto:joao@piroca.ninja'>joao@piroca.ninja</a>."});
                     }else{
             if((hash==usuario_hash)){
-                let autor = results[0].id;
-                let conteudo = req.body.conteudo;
-                let nome = req.body.titulo;
-                let subtitulo = req.body.subtitulo;
                 const today = new Date();
                 const day = today.getDate();
                 const month = today.getMonth();
                 const year = today.getFullYear();  
-                var dataf = year +'-'+(month+1)+'-'+day;
-                var query = "INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values('"+nome+"','"+conteudo+"','"+dataf+"','"+autor+"','"+subtitulo+"')";
-                dbConn.query(query, function (error, results, fields) {
-        if (error) {
+                let data1 = year +'-'+(month+1)+'-'+day;
+                let autoria = results[0].id;
+                dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)",[req.body.titulo, req.body.conteudo,data1,results[0].id, req.body.subtitulo], function (error, results, fields) {
+                    if (error) {
             throw error;
         }
             return res.send({ error: 'false',data:"Post adicionado com sucesso!"});
