@@ -98,12 +98,17 @@ return res.send({ error: false, data: results[0], message: 'Ok.' });
 
 //Carregar postagens
 app.post('/post/', function (req, res) {
-    
     dbConn.query('SELECT * FROM post ORDER BY id DESC', function (error, results, fields) {
     if (error) throw error;
     return res.send({ error: false, data: results });
     });
     });
+app.post('/userpost/', function (req, res) {
+    dbConn.query('SELECT * FROM post ORDER BY id DESC WHERE `autor` = ?',req.body.uid, function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results });
+    });
+});
 app.post('/addpost/', function (req, res) {
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
