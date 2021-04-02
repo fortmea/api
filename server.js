@@ -86,7 +86,7 @@ let usuario_id = req.body.id;
 if (!usuario_id) {
 return res.status(400).send({ error: true, message: 'Informe um nome de usuário!' });
 }
-dbConn.query('SELECT `nome` FROM usuario where id=?', usuario_id, function (error, results, fields) {
+dbConn.query('SELECT * FROM usuario where id=?', usuario_id, function (error, results, fields) {
 if (error) throw error;
 return res.send({ error: false, data: results[0], message: 'Ok.' });
 });
@@ -131,7 +131,6 @@ app.post('/addpost/', function (req, res) {
                 const month = today.getMonth();
                 const year = today.getFullYear();  
                 let data1 = year +'-'+(month+1)+'-'+day;
-                let autoria = results[0].id;
                 dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)",[req.body.titulo, req.body.conteudo,data1,results[0].id, req.body.subtitulo], function (error, results, fields) {
                     if (error) {
             throw error;
