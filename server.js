@@ -104,7 +104,7 @@ app.post('/post/', function (req, res) {
     });
     });
 app.post('/userpost/', function (req, res) {
-    dbConn.query('SELECT * FROM post ORDER BY id DESC WHERE `autor` = ?',req.body.uid, function (error, results, fields) {
+    dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC',req.body.uid, function (error, results, fields) {
         if (error) throw error;
         return res.send({ error: false, data: results });
     });
