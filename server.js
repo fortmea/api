@@ -88,7 +88,11 @@ return res.status(400).send({ error: true, message: 'Informe um nome de usuário
 }
 dbConn.query('SELECT * FROM usuario where id=?', usuario_id, function (error, results, fields) {
 if (error) throw error;
+if(results){
 return res.send({ error: false, data: results[0], message: 'Ok.' });
+}else{
+    return res.send({ error: true, data: "Não encontrado!", message: 'Usuário não encontrado.' });  
+}
 });
 });
 
