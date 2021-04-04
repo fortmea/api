@@ -10,7 +10,8 @@ const client  = redis.createClient();
 const router = express.Router();*/
 //var qs = require('querystring');
 const nodemailer = require('nodemailer');
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({extended:true,limit:'25mb'}));
+app.use(express.json({limit: '25mb'}));
 app.use(cors());
 app.get('/', function (req, res) {
 return res.send({ error: true, message: 'hello' })
@@ -28,7 +29,7 @@ dbConn.connect();
     saveUninitialized: false,
     resave: false
 }));
-/* app.use((req, res, next) => {
+ app.use((req, res, next) => {
     let validIps = ['::12', '127.0.0.1','::1','68.183.126.19']; // Put your IP whitelist in this array
       if(validIps.includes(req.socket.remoteAddress)){
           // IP is ok, so go on
@@ -109,6 +110,8 @@ app.post('/userpost/', function (req, res) {
         return res.send({ error: false, data: results });
     });
 });
+
+//adicionar postagem
 app.post('/addpost/', function (req, res) {
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
@@ -210,6 +213,7 @@ app.post('/confirmar/',function(req,res){
 app.post('/register/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_email = req.body.email;
+    let imagem_usuario = req.body.imagem|null;
     var str = usuario_nome+usuario_email;
     var data = new Date();
     const time = data.getTime();
@@ -228,8 +232,7 @@ app.post('/register/', function (req, res) {
     if(results[0]){
         return res.send({ error: true, data: "Usuário já existe!"});
     }else{
-        var querys = "INSERT INTO usuario(`nome`,`email`,`date`) values('"+usuario_nome+ "','"+usuario_email+"','"+time+"') ";
-        dbConn.query(querys, function (error){
+        dbConn.query("INSERT INTO usuario(`nome`,`email`,`date`,`image`) values(?,?,?,?)",[usuario_nome,usuario_nome,time,imagem_usuario], function (error){
         if (error) throw error;
         let transporter = nodemailer.createTransport({
             host: 'mail.piroca.ninja',
@@ -242,7 +245,7 @@ app.post('/register/', function (req, res) {
          });
          
          let mailOptions = {
-            from: '"Suporte - Contas" <suporte@piroca.ninja>', 
+            from: '"Suporte - Contas" <suporte@joaowalteramadeu.me>', 
             to: usuario_email, 
             subject: "Confirme seu endereço de email", 
             //text: emailData.text,
@@ -263,7 +266,11 @@ app.post('/register/', function (req, res) {
 });
 
 app.listen(process.env.PORT || 5000, function() {
-    console.log("Server started.......");
+    for(var i = 0;i<50;i++){
+        process.stdout.write(".");
+    }
+    console.log("\nServidor iniciado...");
+    
 });
 
 module.exports = app;
