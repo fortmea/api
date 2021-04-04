@@ -232,7 +232,7 @@ app.post('/register/', function (req, res) {
     if(results[0]){
         return res.send({ error: true, data: "Usuário já existe!"});
     }else{
-        dbConn.query("INSERT INTO usuario(`nome`,`email`,`date`,`image`) values(?,?,?,?)",[usuario_nome,usuario_nome,time,imagem_usuario], function (error){
+        dbConn.query("INSERT INTO usuario(`nome`,`email`,`date`,`image`) values(?,?,?,?)",[usuario_nome,usuario_email,time,imagem_usuario], function (error){
         if (error) throw error;
         let transporter = nodemailer.createTransport({
             host: 'mail.piroca.ninja',
