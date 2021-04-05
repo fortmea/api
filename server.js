@@ -213,7 +213,7 @@ app.post('/confirmar/',function(req,res){
 app.post('/register/', function (req, res) {
     let usuario_nome = req.body.nome;
     let usuario_email = req.body.email;
-    let imagem_usuario = req.body.imagem|null;
+    let imagem_usuario = req.body.imagem;
     var str = usuario_nome+usuario_email;
     var data = new Date();
     const time = data.getTime();
@@ -232,6 +232,7 @@ app.post('/register/', function (req, res) {
     if(results[0]){
         return res.send({ error: true, data: "Usuário já existe!"});
     }else{
+        
         dbConn.query("INSERT INTO usuario(`nome`,`email`,`date`,`image`) values(?,?,?,?)",[usuario_nome,usuario_email,time,imagem_usuario], function (error){
         if (error) throw error;
         let transporter = nodemailer.createTransport({
