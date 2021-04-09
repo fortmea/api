@@ -51,7 +51,9 @@ app.post('/login/',(req,res) => {
     var usuario_timestamp;
     var usuario_foto;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
-        if (error) throw error;
+         if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
         if(results[0]){
         usuario_nome = results[0].nome;
         usuario_timestamp = results[0].date;
@@ -88,7 +90,9 @@ if (!usuario_id) {
 return res.status(400).send({ error: true, message: 'Informe um nome de usuário!' });
 }
 dbConn.query('SELECT * FROM usuario where id=?', usuario_id, function (error, results, fields) {
-if (error) throw error;
+ if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
 if(results[0]){
 return res.send({ error: false, data: results[0], message: 'Ok.' });
 }else{
@@ -100,13 +104,17 @@ return res.send({ error: false, data: results[0], message: 'Ok.' });
 //Carregar postagens
 app.post('/post/', function (req, res) {
     dbConn.query('SELECT * FROM post ORDER BY id DESC', function (error, results, fields) {
-    if (error) throw error;
+     if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
     return res.send({ error: false, data: results });
     });
     });
 app.post('/userpost/', function (req, res) {
     dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC',req.body.uid, function (error, results, fields) {
-        if (error) throw error;
+         if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
         return res.send({ error: false, data: results });
     });
 });
@@ -120,7 +128,9 @@ app.post('/addpost/', function (req, res) {
     var usuario_foto;
     var usuario_confirmado;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
-        if (error) throw error;
+         if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
             if(results[0]){
                 usuario_nome = results[0].nome;
                 usuario_timestamp = results[0].date;
@@ -171,7 +181,9 @@ app.post('/confirmar/',function(req,res){
     var usuario_timestamp;
     var usuario_confirmado;
     dbConn.query('SELECT * FROM `usuario` where `email`=?',usuario_email, function (error, results, fields) {
-        if (error) throw error;
+         if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
             if(results[0]){
                 usuario_nome = results[0].nome;
                 usuario_timestamp = results[0].date;
@@ -189,7 +201,7 @@ app.post('/confirmar/',function(req,res){
                 var query = 'UPDATE `db_web`.`usuario` SET `confirmado`="1" WHERE  `id`="'+usuario_id+'"';
                 dbConn.query(query, function (error, results, fields) {
         if (error) {
-            throw error;
+           return res.status(500).send({message:'erro interno' });
         }
             return res.send({ error: 'false',data:"Usuário confirmado com sucesso!"});
         })
@@ -228,13 +240,17 @@ app.post('/register/', function (req, res) {
     }
     var queryv = "SELECT * FROM `usuario` WHERE email='"+usuario_email+"'";
     dbConn.query(queryv, function(error, results, fields){
-    if (error) throw error;
+     if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
     if(results[0]){
         return res.send({ error: true, data: "Usuário já existe!"});
     }else{
         
         dbConn.query("INSERT INTO usuario(`nome`,`email`,`date`,`image`) values(?,?,?,?)",[usuario_nome,usuario_email,time,imagem_usuario], function (error){
-        if (error) throw error;
+         if (error) {
+           return res.status(500).send({message:'erro interno' });
+        }
         let transporter = nodemailer.createTransport({
             host: 'mail.piroca.ninja',
             port: 465, 
