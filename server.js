@@ -17,10 +17,10 @@ app.get('/', function (req, res) {
 return res.send({ error: true, message: 'hello' })
 });
 var dbConn = mysql.createConnection({
-    host: '68.183.126.19',
-    user: 'joaoi',
-    password: 'Leitecomcafe',
-    database: 'db_web'
+    host: process.env.host,
+    user: process.env.db_user,
+    password: process.env.db_pwd,
+    database: process.env.db_name
 });
 dbConn.connect(); 
 /*app.use(session({
@@ -140,7 +140,7 @@ app.post('/addpost/', function (req, res) {
                 console.log(usuario_timestamp);
                 var str = usuario_nome+usuario_email;
                 var datb = usuario_timestamp+str;
-                const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
+                const secret = process.env.secret;
                 const md5Hasher = crypto.createHmac("md5", secret);
                 const hash =  md5Hasher.update(datb).digest("hex");
                 if(usuario_confirmado==1){
@@ -192,7 +192,7 @@ app.post('/confirmar/',function(req,res){
                 console.log(usuario_timestamp);
                 var str = usuario_nome+usuario_email;
                 var datb = usuario_timestamp+str;
-                const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
+                const secret = process.env.secret;
                 const md5Hasher = crypto.createHmac("md5", secret);
                 const hash =  md5Hasher.update(datb).digest("hex");
                 if(usuario_confirmado==0){
@@ -230,7 +230,7 @@ app.post('/register/', function (req, res) {
     var data = new Date();
     const time = data.getTime();
     var datb = time+str;
-    const secret = "KNq72SajoZ2mNtzpBuCxo1ANOYKr7wllYAOzTL7fAZQgrwdHnl2gwizXShYQEBiB1QqC5sdsEkXum0jaWtIwcz57d1l9zGACI68HgPHwENbAdZejG1LlB3XdGyGJE7hEVNVAjF2ByiMoFExmDwQiITsFNPR78MKHXGPpmjPGVjtZ1ShrG3nZpkq7dWfDpmmriGHp0jJI";
+    const secret = process.env.secret;
     const md5Hasher = crypto.createHmac("md5", secret);
     const hash =  md5Hasher.update(datb).digest("hex");
     if ((!usuario_nome)) {
