@@ -4,12 +4,22 @@ var mysql = require('mysql');
 var cors = require('cors')
 const crypto = require("crypto");
 const secret = process.env.secret;
+const redis_host = process.env.redis_host;
+const redis_password = process.env.redis_pwd;
+const website = process.env.website;
+const email_server = process.env.email;
+const admin = process.env.admin;
+const email_pass = process.env.email_pass;
 /*const session = require('express-session');
-const redis = require('redis');
-const redisStore = require('connect-redis')(session);
-const client  = redis.createClient();
 const router = express.Router();*/
-//var qs = require('querystring');
+const redis = require('redis');
+//const redisStore = require('connect-redis')(session);
+const client = redis.createClient({
+    port      : 6379,               // replace with your port
+    host      : redis_host,        // replace with your hostanme or IP address
+    password  : redis_password,    // replace with your password
+});
+
 const nodemailer = require('nodemailer');
 app.use(express.urlencoded({extended:true,limit:'25mb'}));
 app.use(express.json({limit: '25mb'}));
@@ -26,10 +36,10 @@ var dbConn = mysql.createConnection({
 dbConn.connect(); 
 /*app.use(session({
     secret:process.env.secret ,
-    store: new redisStore({ host: 'localhost', port: 6379, client: client,ttl : 260}),
+    store: new redisStore({ host: 'joaowalteramadeu.me', port: 6379, password: redis_password, client: client,ttl : 260}),
     saveUninitialized: false,
     resave: false
-}));
+}));*/
 app.post('/login/',(req,res) => {
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
@@ -56,6 +66,7 @@ app.post('/login/',(req,res) => {
             //req.session.foto = usuario_foto;
             console.log('Login successful');
             res.send({error: 'false',data:'Logado com sucesso!'});
+
         }else{
             console.log("Login error!");
             res.send({error:'true',data:'Erro no login!'});
@@ -64,7 +75,7 @@ app.post('/login/',(req,res) => {
         res.send({error:'true',data:'usuário não encontrado!'})
     }
         });
-});*/
+});
 
 
 
@@ -129,7 +140,7 @@ app.post('/addpost/', function (req, res) {
                 const hash =  md5Hasher.update(datb).digest("hex");
                 if(usuario_confirmado==1){
                     if(usuario_level!=1){
-                        return res.send({error:'true',data:"Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@piroca.ninja'>suporte@piroca.ninja</a> ou <a href='mailto:joao@piroca.ninja'>joao@piroca.ninja</a>."});
+                        return res.send({error:'true',data:"Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@"+email_server+"'>suporte@"+email_server+"</a> ou <a href='mailto:"+admin+"@"+email_server+"'>"+admin+"@"+email_server+"</a>."});
                     }else{
             if((hash==usuario_hash)){
                 const today = new Date();
@@ -234,21 +245,21 @@ app.post('/register/', function (req, res) {
            return res.status(500).send({message:'erro interno' });
         }
         let transporter = nodemailer.createTransport({
-            host: 'mail.piroca.ninja',
+            host: 'mail.'+email_server,
             port: 465, 
             secure: true, 
             auth: {
                user: 'suporte',
-               pass: 'suportesuporte' 
+               pass: email_pass 
             }
          });
          
          let mailOptions = {
-            from: '"Suporte - Contas" <suporte@joaowalteramadeu.me>', 
+            from: '"Suporte - Contas" <suporte@'+website+'>', 
             to: usuario_email, 
             subject: "Confirme seu endereço de email", 
             //text: emailData.text,
-            html:"<p>Olá, "+usuario_nome+"!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='https://joaowalteramadeu.me/confirmar.html'>Confirmar</a>" 
+            html:"<p>Olá, "+usuario_nome+"!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='https://"+website+"/confirmar.html'>Confirmar</a>" 
          };
          
          // send mail with defined transport object
@@ -271,5 +282,7 @@ app.listen(process.env.PORT || 5000, function() {
     console.log("\nServidor iniciado...");
     
 });
-
+client.on('connect', function() {
+    console.log('connected');
+});
 module.exports = app;
