@@ -21,6 +21,7 @@ const client = redis.createClient({
 });
 
 const nodemailer = require('nodemailer');
+const { request } = require('http');
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(cors());
@@ -271,7 +272,87 @@ app.post('/confirmar/', function (req, res) {
         return res.send({ error: 'true', data: "Informe nome de usuário e email!" });
     }
 });
+app.post('/passwordrequest', function (req, res) {
+    let usuario_email = req.body.email;
+    var queryv = "SELECT * FROM `usuario` WHERE email='" + usuario_email + "'";
+    dbConn.query(queryv, function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({ message: 'erro interno' });
+        }
+        if (!results[0]) {
+            return res.send({ error: true, data: "Usuário não encontrado!" });
+        } else {
+            var data = new Date();
+            const time = data.getTime();
+            var datb = time + results[0].date;
+            const md5Hasher = crypto.createHmac("md5", secret);
+            const hash = md5Hasher.update(datb).digest("hex");
+            dbConn.query("INSERT INTO pcr(`id`,`usuario`) values(?,?)", [hash, results[0].id], function (error) {
+                if (error) {
+                    return res.status(500).send({ message: 'erro interno' });
+                }
+                let transporter = nodemailer.createTransport({
+                    host: 'mail.' + email_server,
+                    port: 465,
+                    secure: true,
+                    auth: {
+                        user: 'suporte',
+                        pass: email_pass
+                    }
+                });
 
+                let mailOptions = {
+                    from: '"Suporte - Contas" <suporte@' + website + '>',
+                    to: usuario_email,
+                    subject: "Solicitação de alteração de senha",
+                    //text: emailData.text,
+                    html: `<p>Olá, ` + results[0].nome + `!</p><br><h4>Seu link para fazer a alteração:</h4><br><a href='https://` + website + `/senha.html?pc=` + hash + `'>Mudar minha senha</a><br>
+                    <h4 style='color:orangered'>Caso não consiga clicar no link acima, copie o link: </h4><br><h4 style='color:blue'>https://` + website + `/novasenha.html?pc=` + hash + `</h4><br>
+                    <h4>Caso não tenha solicitado uma alteração na sua senha, apenas ignore o email.</h4>
+                    `
+                };
+
+                // send mail with defined transport object
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        return console.log(error.message);
+                    }
+                    console.log('Message sent: %s', info.messageId);
+                });
+                return res.send({ error: false, data: hash, message: "Ok." });
+            });
+        }
+    });
+});
+app.post('/changepassword', function(req,res){
+    let request_id = req.request_id;
+    var queryv = "SELECT * FROM `pcr` WHERE id='" + request_id + "'";
+    dbConn.query(queryv, function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({ message: 'erro interno' });
+        }
+        if (!results[0]) {
+            return res.send({ error: true, data: "Link inválido!<br>Talvez você já tenha usado-o. Caso queira gerar uma nova senha,<br>faça uma nova soliciatação e verifique seu email." });
+        } else {
+            var data = new Date();
+            const time = data.getTime();
+            const hash;
+            dbConn.query("UPDATE usuario SET `date` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
+                if(error){
+                    return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
+                }
+                dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, results) {
+                    var str = results[0].nome + results[0].email;
+                    var datb = time + str;
+                    const md5Hasher = crypto.createHmac("md5", secret);
+                    hash = md5Hasher.update(datb).digest("hex");
+                });
+                return res.send({ error: false, data: hash });
+            }
+            );
+        }
+    });
+});
 
 //registrar novo usuário
 app.post('/register/', function (req, res) {
