@@ -340,7 +340,7 @@ app.post('/changepassword', function(req,res){
                     return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
                 }
                 dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, resultsw) {
-                    var str = resultw[0].nome + resultsw[0].email;
+                    var str = resultsw[0].nome + resultsw[0].email;
                     console.log(resultsw[0]);
                     var datb = dtime + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
