@@ -288,6 +288,7 @@ app.post('/passwordrequest', function (req, res) {
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
             dbConn.query("INSERT INTO pcr(`id`,`usuario`) values(?,?)", [hash, results[0].id], function (error) {
+                console.log(results[0]);
                 if (error) {
                     return res.status(500).send({ message: 'erro interno' });
                 }
