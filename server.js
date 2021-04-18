@@ -46,7 +46,6 @@ app.post('/login/', (req, res) => {
     let usuario_hash = req.body.hash;
     var usuario_nome;
     var usuario_timestamp;
-    var usuario_foto;
     dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function (error, results, fields) {
         if (error) {
             return res.status(500).send({ message: 'erro interno' });
@@ -54,26 +53,26 @@ app.post('/login/', (req, res) => {
         if (results[0]) {
             usuario_nome = results[0].nome;
             usuario_timestamp = results[0].pwdate;
-            usuario_foto = results[0].image || null;
-            console.log(usuario_timestamp);
+            //console.log(usuario_timestamp);
             var str = usuario_nome + usuario_email;
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
-            console.log(hash);
+            //console.log(hash);
             if (hash == usuario_hash) {
-                //req.session.email = req.body.email;
-                //req.session.nome = usuario_nome;
-                //req.session.foto = usuario_foto;
-                console.log('Login successful');
-                res.send({ error: 'false', data: 'Logado com sucesso!' });
+                var data = new Date();
+                const time = data.getTime();
+                var str = usuario_nome + results[0].id + time;
+                const md5Hasher = crypto.createHmac("md5", secret);
+                var sessionhash = md5Hasher.update(datb).digest("hex");
+                res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
 
             } else {
                 console.log("Login error!");
-                res.send({ error: 'true', data: 'Erro no login!' });
+                res.send({ error: 'true', message: 'Erro no login!' });
             }
         } else {
-            res.send({ error: 'true', data: 'usuário não encontrado!' })
+            res.send({ error: 'true', message: 'usuário não encontrado!' })
         }
     });
 });
@@ -190,7 +189,7 @@ app.post('/addproj/', function (req, res) {
             usuario_foto = results[0].image || null;
             usuario_confirmado = results[0].confirmado;
             usuario_level = results[0].level;
-            console.log(usuario_timestamp);
+            //console.log(usuario_timestamp);
             var str = usuario_nome + usuario_email;
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
@@ -241,7 +240,7 @@ app.post('/confirmar/', function (req, res) {
                 usuario_timestamp = results[0].pwdate;
                 usuario_confirmado = results[0].confirmado;
 
-                console.log(usuario_timestamp);
+                //console.log(usuario_timestamp);
                 var str = usuario_nome + usuario_email;
                 var datb = usuario_timestamp + str;
                 const md5Hasher = crypto.createHmac("md5", secret);
@@ -341,7 +340,6 @@ app.post('/changepassword', function(req,res){
                 }
                 dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, resultsw) {
                     var str = resultsw[0].nome + resultsw[0].email;
-                    console.log(resultsw[0]);
                     var datb = dtime + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
                     const hash = md5Hasher.update(datb).digest("hex");
