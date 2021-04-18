@@ -130,7 +130,6 @@ app.post('/addpost/', function (req, res) {
     let usuario_hash = req.body.hash;
     var usuario_nome;
     var usuario_timestamp;
-    var usuario_foto;
     var usuario_confirmado;
     dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function (error, results, fields) {
         if (error) {
@@ -138,8 +137,7 @@ app.post('/addpost/', function (req, res) {
         }
         if (results[0]) {
             usuario_nome = results[0].nome;
-            usuario_timestamp = results[0].date;
-            usuario_foto = results[0].image || null;
+            usuario_timestamp = results[0].pwdate;
             usuario_confirmado = results[0].confirmado;
             usuario_level = results[0].level;
             console.log(usuario_timestamp);
@@ -187,7 +185,7 @@ app.post('/addproj/', function (req, res) {
         }
         if (results[0]) {
             usuario_nome = results[0].nome;
-            usuario_timestamp = results[0].date;
+            usuario_timestamp = results[0].pwdate;
             usuario_foto = results[0].image || null;
             usuario_confirmado = results[0].confirmado;
             usuario_level = results[0].level;
