@@ -58,7 +58,7 @@ app.post('/login/', (req, res) => {
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
-            //console.log(hash);
+            console.log(hash);
             if (hash == usuario_hash) {
                 var data = new Date();
                 const time = data.getTime();
@@ -144,7 +144,7 @@ app.post('/addpost/', function (req, res) {
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
-            console.log(hash);
+            //console.log(hash);
             if (usuario_confirmado == 1) {
                 if (usuario_level != 1) {
                     return res.send({ error: 'true', data: "Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
