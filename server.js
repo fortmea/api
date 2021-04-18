@@ -52,7 +52,7 @@ app.post('/login/', (req, res) => {
             return res.status(500).send({ message: 'erro interno' });
         }
         if (results[0]) {
-            console.log(results[0]);
+            console.log(results[0].pwdate+"\n"+results[0].nome);
             usuario_timestamp = results[0].pwdate;
             //console.log(usuario_timestamp);
             var str = results[0].nome + usuario_email;
