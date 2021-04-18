@@ -319,7 +319,7 @@ app.post('/passwordrequest', function (req, res) {
                     }
                     console.log('Message sent: %s', info.messageId);
                 });
-                return res.send({ error: false, data: hash, message: "Ok." });
+                return res.send({ error: false, data: "Email com link de alteração de senha enviado com sucesso!", message: "Ok." });
             });
         }
     });
@@ -336,7 +336,6 @@ app.post('/changepassword', function(req,res){
         } else {
             var data = new Date();
             const time = data.getTime();
-            var hash;
             dbConn.query("UPDATE usuario SET `date` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
                 if(error){
                     return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
@@ -345,9 +344,9 @@ app.post('/changepassword', function(req,res){
                     var str = results[0].nome + resultsw[0].email;
                     var datb = time + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
-                    hash = md5Hasher.update(datb).digest("hex");
+                    const hash = md5Hasher.update(datb).digest("hex");
                     dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function (error){});
-                    return res.send({ error: false, data: hash });
+                    return res.send({ error: false, data: hash,message: "Ok." });
                 });
                
             }
