@@ -53,7 +53,7 @@ app.post('/login/', (req, res) => {
         }
         if (results[0]) {
             usuario_nome = results[0].nome;
-            usuario_timestamp = results[0].date;
+            usuario_timestamp = results[0].pwdate;
             usuario_foto = results[0].image || null;
             console.log(usuario_timestamp);
             var str = usuario_nome + usuario_email;
@@ -180,7 +180,6 @@ app.post('/addproj/', function (req, res) {
     let usuario_hash = req.body.hash;
     var usuario_nome;
     var usuario_timestamp;
-    var usuario_foto;
     var usuario_confirmado;
     dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function (error, results, fields) {
         if (error) {
@@ -240,7 +239,7 @@ app.post('/confirmar/', function (req, res) {
             }
             if (results[0]) {
                 usuario_nome = results[0].nome;
-                usuario_timestamp = results[0].date;
+                usuario_timestamp = results[0].pwdate;
                 usuario_confirmado = results[0].confirmado;
 
                 console.log(usuario_timestamp);
@@ -284,7 +283,7 @@ app.post('/passwordrequest', function (req, res) {
         } else {
             var data = new Date();
             const time = data.getTime();
-            var datb = time + results[0].date;
+            var datb = time + results[0].pwdate;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
             dbConn.query("INSERT INTO pcr(`id`,`id_usuario`) values(?,?)", [hash, results[0].id], function (error) {
@@ -336,7 +335,7 @@ app.post('/changepassword', function(req,res){
         } else {
             var data = new Date();
             const time = data.getTime();
-            dbConn.query("UPDATE usuario SET `date` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
+            dbConn.query("UPDATE usuario SET `pwdate` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
                 if(error){
                     return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
                 }
@@ -380,7 +379,7 @@ app.post('/register/', function (req, res) {
             return res.send({ error: true, data: "Usuário já existe!" });
         } else {
 
-            dbConn.query("INSERT INTO usuario(`nome`,`email`,`date`,`image`) values(?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario], function (error) {
+            dbConn.query("INSERT INTO usuario(`nome`,`email`,`pwdate`,`image`) values(?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario], function (error) {
                 if (error) {
                     return res.status(500).send({ message: 'erro interno' });
                 }
