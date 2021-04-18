@@ -44,17 +44,15 @@ dbConn.connect();
 app.post('/login/', (req, res) => {
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
-    var usuario_nome;
     var usuario_timestamp;
     dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function (error, results, fields) {
         if (error) {
             return res.status(500).send({ message: 'erro interno' });
         }
         if (results[0]) {
-            usuario_nome = results[0].nome;
             usuario_timestamp = results[0].pwdate;
             //console.log(usuario_timestamp);
-            var str = usuario_nome + usuario_email;
+            var str = results[0].nome + usuario_email;
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
@@ -62,9 +60,10 @@ app.post('/login/', (req, res) => {
             if (hash == usuario_hash) {
                 var data = new Date();
                 const time = data.getTime();
-                var str = usuario_nome + results[0].id + time;
+                var strb = usuario_nome + results[0].id;
+                var hue = strb + time;
                 const md5Hasher = crypto.createHmac("md5", secret);
-                var sessionhash = md5Hasher.update(datb).digest("hex");
+                var sessionhash = md5Hasher.update(hue).digest("hex");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
 
             } else {
