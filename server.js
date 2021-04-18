@@ -333,13 +333,14 @@ app.post('/changepassword', function(req,res){
         } else {
             var data = new Date();
             const time = data.getTime();
+            const dtime = time;
             dbConn.query("UPDATE usuario SET `pwdate` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
                 if(error){
                     return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
                 }
                 dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, resultsw) {
-                    var str = results[0].nome + resultsw[0].email;
-                    var datb = time + str;
+                    var str = resultw[0].nome + resultsw[0].email;
+                    var datb = dtime + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
                     const hash = md5Hasher.update(datb).digest("hex");
                     dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function (error){});
