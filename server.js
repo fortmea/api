@@ -36,7 +36,7 @@ var dbConn = mysql.createConnection({
 dbConn.connect();
 /*app.use(session({
     secret:process.env.secret ,
-    store: new redisStore({ host: 'joaowalteramadeu.me', port: 6379, password: redis_password, client: client,ttl : 260}),
+    store: new redisStore({ host: 'redis_host', port: 6379, password: redis_password, client: client,ttl : 260}),
     saveUninitialized: false,
     resave: false
 }));*/
