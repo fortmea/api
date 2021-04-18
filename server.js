@@ -145,6 +145,7 @@ app.post('/addpost/', function (req, res) {
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
+            console.log(hash);
             if (usuario_confirmado == 1) {
                 if (usuario_level != 1) {
                     return res.send({ error: 'true', data: "Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
@@ -340,6 +341,7 @@ app.post('/changepassword', function(req,res){
                 }
                 dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, resultsw) {
                     var str = resultw[0].nome + resultsw[0].email;
+                    console.log(resultsw[0]);
                     var datb = dtime + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
                     const hash = md5Hasher.update(datb).digest("hex");
