@@ -325,8 +325,7 @@ app.post('/passwordrequest', function (req, res) {
     });
 });
 app.post('/changepassword', function(req,res){
-    let request_id = req.request_id;
-    console.log(request_id);
+    let request_id = req.body.request_id;
     var queryv = "SELECT * FROM `pcr` WHERE id='" + request_id + "'";
     dbConn.query(queryv, function (error, results, fields) {
         if (error) {
