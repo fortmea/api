@@ -344,7 +344,7 @@ app.post('/changepassword', function(req,res){
                     const md5Hasher = crypto.createHmac("md5", secret);
                     const hash = md5Hasher.update(datb).digest("hex");
                     dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function (error){});
-                    return res.send({ error: false, data: hash,message: "Ok." });
+                    return res.send({ error: false, data: "Sucesso!<br>Sua nova senha é:<br><b>"+hash+"</b>",message: "Ok." });
                 });
                
             }
