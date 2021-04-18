@@ -326,6 +326,7 @@ app.post('/passwordrequest', function (req, res) {
 });
 app.post('/changepassword', function(req,res){
     let request_id = req.request_id;
+    console.log(request_id);
     var queryv = "SELECT * FROM `pcr` WHERE id='" + request_id + "'";
     dbConn.query(queryv, function (error, results, fields) {
         if (error) {
@@ -341,12 +342,13 @@ app.post('/changepassword', function(req,res){
                 if(error){
                     return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
                 }
-                dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, results) {
-                    var str = results[0].nome + results[0].email;
+                dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, resultsw) {
+                    var str = results[0].nome + resultsw[0].email;
                     var datb = time + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
                     hash = md5Hasher.update(datb).digest("hex");
                 });
+                dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function (error){});
                 return res.send({ error: false, data: hash });
             }
             );
