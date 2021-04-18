@@ -63,7 +63,7 @@ app.post('/login/', (req, res) => {
             if (hash == usuario_hash) {
                 var data = new Date();
                 const time = data.getTime();
-                var strb = usuario_nome + results[0].id;
+                var strb = results[0].nome + results[0].id;
                 var hue = strb + time;
                 const md5Hasher = crypto.createHmac("md5", secret);
                 var sessionhash = md5Hasher.update(hue).digest("hex");
