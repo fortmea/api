@@ -336,7 +336,7 @@ app.post('/changepassword', function(req,res){
         } else {
             var data = new Date();
             const time = data.getTime();
-            const hash;
+            var hash;
             dbConn.query("UPDATE usuario SET `date` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
                 if(error){
                     return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
