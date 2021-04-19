@@ -52,7 +52,7 @@ app.post('/login/', function (req, res) {
             return res.status(500).send({ message: 'erro interno' });
         }
         if (results[0]) {
-            console.log(results[0].pwdate + "\n" + results[0].nome);
+            //console.log(results[0].pwdate + "\n" + results[0].nome);
             usuario_timestamp = results[0].pwdate;
             var str = results[0].nome + usuario_email;
             var datb = usuario_timestamp + str;
@@ -80,7 +80,7 @@ app.post('/login/', function (req, res) {
                         res.send({error:'true', message:'Problema com o login<br>Erro interno.'});
                     }
                 });
-                client.expire(hash, 3600);
+                //client.expire(hash, 3600);
 
             } else {
                 console.log("Login error!");
