@@ -75,12 +75,12 @@ app.post('/login/', function (req, res) {
                 var ip = req.header('x-forwarded-for') || req.remoteAddress;
                 var instante = (date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds);
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([hash, results[0].id, ip, instante], function (err, reply) {
+                client.sadd([sessionhash, results[0].id, ip, instante], function (err, reply) {
                     if(err){
                         res.send({error:'true', message:'Problema com o login<br>Erro interno.'});
                     }
                 });
-                //client.expire(hash, 3600);
+                client.expire(hash, 3600);
 
             } else {
                 console.log("Login error!");
