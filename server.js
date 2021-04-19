@@ -65,17 +65,12 @@ app.post('/login/', function (req, res) {
                 var hue = strb + time;
                 const md5Hasher = crypto.createHmac("md5", secret);
                 var sessionhash = md5Hasher.update(hue).digest("hex");
-                let date_ob = new Date();
-                let date = ("0" + date_ob.getDate()).slice(-2);
-                let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
-                let year = date_ob.getFullYear();
-                let hours = date_ob.getHours();
-                let seconds = date_ob.getSeconds();
-                let minutes = date_ob.getMinutes();
-                var ip = req.header('x-forwarded-for') || req.remoteAddress;
-                var instante = (date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds);
+                var data = new Date();
+                data.setSeconds(0, 0);
+                var stamp = data.toISOString().replace(/T/, " ").replace(/:00.000Z/, "");
+                stamp = stamp.replace("00:00","");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([sessionhash, results[0].id, ip, instante], function (err, reply) {
+                client.sadd([sessionhash, "id:"+ results[0].id, ip, stamp], function (err, reply) {
                     if(err){
                         res.send({error:'true', message:'Problema com o login<br>Erro interno.'});
                     }
