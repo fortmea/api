@@ -71,7 +71,7 @@ app.post('/login/', function (req, res) {
                 var stamp = data.toISOString().replace(/T/, " ").replace(/:00.000Z/, "");
                 stamp = stamp.replace("00:00","");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([sessionhash, "id:"+ results[0].id, ip, stamp], function (err, reply) {
+                client.sadd([sessionhash, "id_"+results[0].id, ip, stamp], function (err, reply) {
                     if(err){
                         res.send({error:'true', message:'Problema com o login<br>Erro interno.'});
                     }
