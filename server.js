@@ -43,7 +43,7 @@ dbConn.connect();
 }));*/
 
 //Login
-app.post('/login/', (req, res) => {
+app.post('/login/', function (req, res) {
     let usuario_email = req.body.email;
     let usuario_hash = req.body.hash;
     var usuario_timestamp;
@@ -52,14 +52,12 @@ app.post('/login/', (req, res) => {
             return res.status(500).send({ message: 'erro interno' });
         }
         if (results[0]) {
-            console.log(results[0].pwdate+"\n"+results[0].nome);
+            console.log(results[0].pwdate + "\n" + results[0].nome);
             usuario_timestamp = results[0].pwdate;
-            //console.log(usuario_timestamp);
             var str = results[0].nome + usuario_email;
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
-            console.log(hash);
             if (hash == usuario_hash) {
                 var data = new Date();
                 const time = data.getTime();
@@ -67,20 +65,41 @@ app.post('/login/', (req, res) => {
                 var hue = strb + time;
                 const md5Hasher = crypto.createHmac("md5", secret);
                 var sessionhash = md5Hasher.update(hue).digest("hex");
+                let date_ob = new Date();
+                let date = ("0" + date_ob.getDate()).slice(-2);
+                let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+                let year = date_ob.getFullYear();
+                let hours = date_ob.getHours();
+                let seconds = date_ob.getSeconds();
+
+                var ip = req.header('x-forwarded-for') || req.remoteAddress;
+                var instante = (date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds);
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
+                client.sadd([hash, results[0].id, ip, instante], function (err, reply) {
+                    if(err){
+                        res.send({error:'true', message:'Problema com o login<br>Erro interno.'});
+                    }
+                });
+                client.expire(hash, 3600);
 
             } else {
                 console.log("Login error!");
                 res.send({ error: 'true', message: 'Erro no login!' });
             }
         } else {
-            res.send({ error: 'true', message: 'usuário não encontrado!' })
+            res.send({ error: 'true', message: 'Usuário não encontrado!' })
         }
     });
 });
-
-
-
+app.post('/logout/', function (req, res) {
+    let sessionhash = req.body.session;
+    client.del(sessionhash, function(err, reply) {
+        if(err){
+            return res.send({error:true, message:'Falha ao Finalizar sessão'});
+        }
+        return res.send({error:false});
+    });
+});
 //procurar nome de usuário por ID
 app.post('/usuario/', function (req, res) {
     let usuario_id = req.body.id;
@@ -146,7 +165,6 @@ app.post('/addpost/', function (req, res) {
             var datb = usuario_timestamp + str;
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
-            //console.log(hash);
             if (usuario_confirmado == 1) {
                 if (usuario_level != 1) {
                     return res.send({ error: 'true', data: "Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
@@ -323,7 +341,7 @@ app.post('/passwordrequest', function (req, res) {
         }
     });
 });
-app.post('/changepassword', function(req,res){
+app.post('/changepassword', function (req, res) {
     let request_id = req.body.request_id;
     var queryv = "SELECT * FROM `pcr` WHERE id='" + request_id + "'";
     dbConn.query(queryv, function (error, results, fields) {
@@ -337,18 +355,18 @@ app.post('/changepassword', function(req,res){
             const time = data.getTime();
             const dtime = time;
             dbConn.query("UPDATE usuario SET `pwdate` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
-                if(error){
-                    return  res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
+                if (error) {
+                    return res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
                 }
                 dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, resultsw) {
                     var str = resultsw[0].nome + resultsw[0].email;
                     var datb = dtime + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
                     const hash = md5Hasher.update(datb).digest("hex");
-                    dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function (error){});
-                    return res.send({ error: false, data: "Sucesso!<br>Sua nova senha é:<br><b>"+hash+"</b>",message: "Ok." });
+                    dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function (error) { });
+                    return res.send({ error: false, data: "Sucesso!<br>Sua nova senha é:<br><b>" + hash + "</b>", message: "Ok." });
                 });
-               
+
             }
             );
         }
