@@ -71,7 +71,7 @@ app.post('/login/', function (req, res) {
                 var stamp = data.toISOString().replace(/T/, " ").replace(/:00.000Z/, "");
                 stamp = stamp.replace("00:00","");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([sessionhash, "id:"+ results[0].id, ip, stamp ], function (err, reply) {
+                client.sadd([sessionhash, "id:"+ results[0].id, ip, stamp], function (err, reply) {
                     if(err){
                         res.send({error:'true', message:'Problema com o login<br>Erro interno.'});
                     }
@@ -94,6 +94,15 @@ app.post('/logout/', function (req, res) {
             return res.send({error:true, message:'Falha ao Finalizar sessão'});
         }
         return res.send({error:false});
+    });
+});
+app.post('/sessiondata', function(req,res){
+    let sessionhash = req.body.session;
+    client.smembers(sessionhash, function(err, reply) {
+        if(err){
+            return res.send({error:true, message: "Sessão não encontrada"});
+        }
+        return res.send({error:false, data:reply});
     });
 });
 //procurar nome de usuário por ID
