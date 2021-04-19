@@ -71,7 +71,7 @@ app.post('/login/', function (req, res) {
                 let year = date_ob.getFullYear();
                 let hours = date_ob.getHours();
                 let seconds = date_ob.getSeconds();
-
+                let minutes = date_ob.getMinutes();
                 var ip = req.header('x-forwarded-for') || req.remoteAddress;
                 var instante = (date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds);
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
