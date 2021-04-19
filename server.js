@@ -59,6 +59,7 @@ app.post('/login/', function (req, res) {
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(datb).digest("hex");
             if (hash == usuario_hash) {
+                var ip = req.header('x-forwarded-for') || req.remoteAddress;
                 var data = new Date();
                 const time = data.getTime();
                 var strb = results[0].nome + results[0].id;
@@ -70,7 +71,7 @@ app.post('/login/', function (req, res) {
                 var stamp = data.toISOString().replace(/T/, " ").replace(/:00.000Z/, "");
                 stamp = stamp.replace("00:00","");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([sessionhash, "id:"+ results[0].id, ip, stamp], function (err, reply) {
+                client.sadd([sessionhash, "id:"+ results[0].id, ip, stamp, ], function (err, reply) {
                     if(err){
                         res.send({error:'true', message:'Problema com o login<br>Erro interno.'});
                     }
