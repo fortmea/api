@@ -160,22 +160,20 @@ app.post('/userpost/', function (req, res) {
 
 //adicionar postagem
 app.post('/addpost/', function (req, res) {
-    let session_hash = req.body.session;    //|recebe as informações da postagem e do usuário
-    var usuario_confirmado;                 //|
-    var usuario_id;
-    var members;
+    let session_hash = req.body.session;    //|recebe hash da sessão
     client.smembers(session_hash, function (err, reply) {
-        members = reply
+        addpost(get_id(reply),req);
     });
-    usuario_id = get_id(members);
-    return console.log(usuario_id);
+    
+});
+function addpost(usuario_id,req){
     dbConn.query('SELECT `id` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {//seleciona as informações do usuário
         if (error) {//caso haja erro:
             return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash;
         }
         if (results[0]) {
-            usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
-            var usuario_level = results[0].level;       //|
+            var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
+            var usuario_level = results[0].level;           //|
             if (usuario_confirmado == 1) {//caso usuário seja confirmado:
                 if (usuario_level != 1) {//caso o usuário não tenha permissão para postar:
                     return res.send({ error: 'true', data: "Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
@@ -199,7 +197,7 @@ app.post('/addpost/', function (req, res) {
             return res.send({ error: 'true', data: "Usuário não encontrado!" });//Envia mensagem informando que o usuário informou um email incorreto
         }
     })
-});
+}
 //adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão
 app.post('/addproj/', function (req, res) {
     let session_hash = req.body.session;    //|recebe as informações da postagem e do usuário
