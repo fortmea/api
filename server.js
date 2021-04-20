@@ -165,8 +165,8 @@ app.post('/addpost/', function (req, res) {
     var usuario_id;
     client.smembers(session_hash, function (err, reply) {
         usuario_id = get_id(reply);
-        return console.log(usuario_id);
     });
+    return console.log(usuario_id);
     dbConn.query('SELECT `id` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {//seleciona as informações do usuário
         if (error) {//caso haja erro:
             return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash;
