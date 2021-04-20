@@ -44,10 +44,11 @@ dbConn.connect();
 //função para extrair o id da informação do redis
 function get_id(session_info) {
     client.smembers(session_info, function (err, reply) {
+        console.log(reply);
         for (var i = 0; i < reply.length; i++) {
             if (reply[i].indexOf('_') > 0) {
-                console.log(session_info[i].split("_").pop());
-                return session_info[i].split("_").pop();
+                console.log(reply[i].split("_").pop());
+                return reply[i].split("_").pop();
             }
         }
     });
