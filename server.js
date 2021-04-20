@@ -153,7 +153,7 @@ app.post('/userpost/', function (req, res) {
 //adicionar postagem
 app.post('/addpost/', function (req, res) {
     let session_hash = req.body.session;    //|recebe o hash da sessão
-    client.smembers(session_info, function (err, reply) {
+    client.smembers(session_hash, function (err, reply) {
         if (err) {
             return res.status(500).send({ message: 'erro interno' });
         }
