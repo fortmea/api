@@ -163,9 +163,11 @@ app.post('/addpost/', function (req, res) {
     let session_hash = req.body.session;    //|recebe as informações da postagem e do usuário
     var usuario_confirmado;                 //|
     var usuario_id;
+    var members;
     client.smembers(session_hash, function (err, reply) {
-        usuario_id = get_id(reply);
+        members = reply
     });
+    usuario_id = get_id(members);
     return console.log(usuario_id);
     dbConn.query('SELECT `id` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {//seleciona as informações do usuário
         if (error) {//caso haja erro:
