@@ -10,8 +10,6 @@ const website = process.env.website;
 const email_server = process.env.email_server;
 const admin = process.env.admin;
 const email_pass = process.env.email_pass;
-/*const session = require('express-session');
-const router = express.Router();*/
 const redis = require('redis');
 //const redisStore = require('connect-redis')(session);
 const client = redis.createClient({
@@ -99,8 +97,8 @@ app.post('/logout/', function (req, res) {
 app.post('/sessiondata', function (req, res) {
     let sessionhash = req.body.session;//recebe hash da sessão
     client.smembers(sessionhash, function (err, reply) {//recebe objeto com os membros do set
-        if (err) {//caso haja erro:
-            return res.send({ error: true, message: "Sessão não encontrada" });
+        if (!reply[0]||err) {//caso haja erro:
+            return res.send({ error: true, message: "Sessão não encontrada",data:"undo" });
         }
         return res.send({ error: false, data: reply });//envia objeto com os membros do set
     });
