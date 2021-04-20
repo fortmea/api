@@ -1,5 +1,5 @@
 {
-  "name": "Fortmea website API",
+  "name": "fortmeaapi",
   "version": "2.0.0",
   "description": "Api rest escrita em NodeJS para meu website pessoal.",
   "main": "app.js",
