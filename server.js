@@ -160,13 +160,12 @@ app.post('/addpost/', function (req, res) {
         for (var i = 0; i < reply.length; i++) {
             if (reply[i].indexOf('_') > 0) {
                 usuario_id = reply[i].split("_").pop();
-                var usuario_confirmado;
-                dbConn.query('SELECT `id` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {//seleciona as informações do usuário
+                dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {//seleciona as informações do usuário
                     if (error) {//caso haja erro:
                         return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash;
                     }
                     if (results[0]) {
-                        usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
+                        var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
                         var usuario_level = results[0].level;       //|
                         if (usuario_confirmado == 1) {//caso usuário seja confirmado:
                             if (usuario_level != 1) {//caso o usuário não tenha permissão para postar:
