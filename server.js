@@ -196,42 +196,41 @@ app.post('/addpost/', function (req, res) {
 });
 //adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão
 app.post('/addproj/', function (req, res) {
-    let session_hash = req.body.session;    //|recebe as informações da postagem e do usuário
-    var usuario_confirmado;                 //|
+    let session_hash = req.body.session;    //|recebe o hash da sessão
     var usuario_id;
     client.smembers(session_hash, function (err, reply) {
         usuario_id = get_id(reply);
-    });
-    dbConn.query('SELECT `id` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {
-        if (error) {
-            return res.status(500).send({ message: 'erro interno' });
-        }
-        if (results[0]) {
-            usuario_confirmado = results[0].confirmado;
-            var usuario_level = results[0].level;
-            if (usuario_confirmado == 1) {
-                if (usuario_level != 1) {
-                    return res.send({ error: 'true', data: "Usuário não tem permissão para adicionar projetos!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
+        dbConn.query('SELECT `id` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {
+            if (error) {
+                return res.status(500).send({ message: 'erro interno' });
+            }
+            if (results[0]) {
+                var usuario_confirmado = results[0].confirmado;
+                var usuario_level = results[0].level;
+                if (usuario_confirmado == 1) {
+                    if (usuario_level != 1) {
+                        return res.send({ error: 'true', data: "Usuário não tem permissão para adicionar projetos!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
+                    } else {
+                        const today = new Date();
+                        const day = today.getDate();
+                        const month = today.getMonth();
+                        const year = today.getFullYear();
+                        let data1 = year + '-' + (month + 1) + '-' + day;
+                        dbConn.query("INSERT INTO `proj`(`nome`,`conteudo`,`data`,`autor`,`resumo`,`addr`) Values(?,?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo, req.body.addr], function (error, results, fields) {
+                            if (error) {
+                                throw error;
+                            }
+                            return res.send({ error: 'false', data: "Projeto adicionado com sucesso!" });
+                        })
+                    }
                 } else {
-                    const today = new Date();
-                    const day = today.getDate();
-                    const month = today.getMonth();
-                    const year = today.getFullYear();
-                    let data1 = year + '-' + (month + 1) + '-' + day;
-                    dbConn.query("INSERT INTO `proj`(`nome`,`conteudo`,`data`,`autor`,`resumo`,`addr`) Values(?,?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo, req.body.addr], function (error, results, fields) {
-                        if (error) {
-                            throw error;
-                        }
-                        return res.send({ error: 'false', data: "Projeto adicionado com sucesso!" });
-                    })
+                    return res.send({ error: 'true', data: "Usuário não confirmado. Por favor, verifique seu email e tente novamente!" });
                 }
             } else {
-                return res.send({ error: 'true', data: "Usuário não confirmado. Por favor, verifique seu email e tente novamente!" });
+                return res.send({ error: 'true', data: "Usuário não encontrado!" });
             }
-        } else {
-            return res.send({ error: 'true', data: "Usuário não encontrado!" });
-        }
-    })
+        })
+    });
 });
 
 //confirmar conta de usuário
