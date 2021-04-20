@@ -96,7 +96,6 @@ app.post('/login/', function (req, res) {
 //Logout
 app.post('/logout/', function (req, res) {
     let sessionhash = req.body.session;//recebe hash da sessão
-    console.log(sessionhash);
     client.del(sessionhash, function (err, reply) {//deleta sessão
         if (err) {//caso erro:
             return res.send({ error: true, message: 'Falha ao Finalizar sessão' });
