@@ -21,7 +21,6 @@ const client = redis.createClient({
 });
 
 const nodemailer = require('nodemailer');
-const { request } = require('http');
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(cors());
@@ -166,6 +165,7 @@ app.post('/addpost/', function (req, res) {
     var usuario_id;
     client.smembers(session_hash, function (err, reply) {
         usuario_id = get_id(reply);
+        return console.log(usuario_id);
     });
     dbConn.query('SELECT `id` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {//seleciona as informações do usuário
         if (error) {//caso haja erro:
