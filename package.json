@@ -1,7 +1,7 @@
 {
-  "name": "api",
-  "version": "1.0.0",
-  "description": "",
+  "name": "Fortmea website API",
+  "version": "2.0.0",
+  "description": "Api rest escrita em NodeJS para meu website pessoal.",
   "main": "app.js",
   "dependencies": {
     "connect-redis": "^5.1.0",
