@@ -21,6 +21,7 @@ const client = redis.createClient({
 });
 
 const nodemailer = require('nodemailer');
+const session = require('express-session');
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(cors());
@@ -42,11 +43,14 @@ dbConn.connect();
 }));*/
 //função para extrair o id da informação do redis
 function get_id(session_info) {
-    for (var i = 0; i < session_info.length; i++) {
-        if (session_info[i].indexOf('_') > 0) {
-            return session_info[i].split("_").pop();
+    client.smembers(session_info, function (err, reply) {
+        for (var i = 0; i < reply.length; i++) {
+            if (reply[i].indexOf('_') > 0) {
+                return session_info[i].split("_").pop();
+            }
         }
-    }
+    });
+    
 }
 //Login
 app.post('/login/', function (req, res) {
@@ -157,15 +161,11 @@ app.post('/userpost/', function (req, res) {
         return res.send({ error: false, data: results });//envia objeto com as postagens do usuário
     });
 });
-
 //adicionar postagem
 app.post('/addpost/', function (req, res) {
     let session_hash = req.body.session;    //|recebe as informações da postagem e do usuário
     var usuario_confirmado;                 //|
-    var usuario_id;
-    client.smembers(session_hash, function (err, reply) {
-        usuario_id = get_id(reply);
-    });
+    var usuario_id  = get_id(session_hash);
     while(usuario_id==undefined){
         console.log(usuario_id);
     }
