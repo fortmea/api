@@ -97,10 +97,18 @@ app.post('/logout/', function (req, res) {
 app.post('/sessiondata', function (req, res) {
     let sessionhash = req.body.session;//recebe hash da sessão
     client.smembers(sessionhash, function (err, reply) {//recebe objeto com os membros do set
-        if (!reply[0]||err) {//caso haja erro:
-            return res.send({ error: true, message: "Sessão não encontrada",data:"undo" });
+        if (err) {
+            console.log(err);
+            return res.status(500);
         }
-        return res.send({ error: false, data: reply });//envia objeto com os membros do set
+        if (reply) {//caso haja erro:
+            if (!reply[0]) {
+                return res.send({ error: true, message: "Sessão não encontrada", data: "undo" });
+            } else {
+                return res.send({ error: false, data: reply });//envia objeto com os membros do set
+            }
+        }
+
     });
 });
 //procurar nome de usuário por ID
