@@ -13,9 +13,9 @@ const email_pass = process.env.email_pass;
 const redis = require('redis');
 //const redisStore = require('connect-redis')(session);
 const client = redis.createClient({
-    port: 6379,               // replace with your port
-    host: redis_host,        // replace with your hostanme or IP address
-    password: redis_password,    // replace with your password
+    port: 6379, // replace with your port
+    host: redis_host, // replace with your hostanme or IP address
+    password: redis_password, // replace with your password
 });
 
 const nodemailer = require('nodemailer');
@@ -23,7 +23,7 @@ const session = require('express-session');
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(cors());
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     return res.send({ error: true, message: 'hello' })
 });
 var dbConn = mysql.createConnection({
@@ -40,127 +40,123 @@ dbConn.connect();
     resave: false
 }));*/
 //Login
-app.post('/login/', function (req, res) {
+app.post('/login/', function(req, res) {
     let usuario_email = req.body.email;
-    let usuario_hash = req.body.hash;
-    var usuario_timestamp;
-    dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function (error, results, fields) { //Procura usuário no banco de dados
+    let usuario_senha = req.body.senha;
+    dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function(error, results, fields) { //Procura usuário no banco de dados
         if (error) {
             return res.status(500).send({ message: 'erro interno' }); //Retorna erro no servidor, evita crash caso haja problema com o banco de dados
         }
-        if (results[0]) {//caso haja usuário cadastrado com o email informado
-            usuario_timestamp = results[0].pwdate;//momento da ultima vez que a senha foi alterada 
-            var str = results[0].nome + usuario_email;
-            var datb = usuario_timestamp + str;
+        if (results[0]) { //caso haja usuário cadastrado com o email informado
             const md5Hasher = crypto.createHmac("md5", secret);
-            const hash = md5Hasher.update(datb).digest("hex");//gera hash do usuário
-            if (hash == usuario_hash) {
-                var ip = req.header('x-forwarded-for') || req.remoteAddress;//pega ip do usuário
+            const hash = md5Hasher.update(results[0].pw).digest("hex"); //gera hash do usuário
+            if (hash == usuario_senha) {
+                var ip = req.header('x-forwarded-for') || req.remoteAddress; //pega ip do usuário
                 var data = new Date();
                 const time = data.getTime();
                 var strb = results[0].nome + results[0].id;
                 var hue = strb + time;
                 const md5Hasher = crypto.createHmac("md5", secret);
-                var sessionhash = md5Hasher.update(hue).digest("hex");//gera hash da sessão
+                var sessionhash = md5Hasher.update(hue).digest("hex"); //gera hash da sessão
                 var data = new Date();
                 data.setSeconds(0, 0);
                 var stamp = data.toISOString().replace(/T/, " ").replace(/:00.000Z/, "");
                 stamp = stamp.replace("00:00", "");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([sessionhash, "id_" + results[0].id, ip, stamp], function (err, reply) {//cria sessão no servidor redis
-                    if (err) {//caso haja erro com o servidor redis:
+                client.sadd([sessionhash, "id_" + results[0].id, ip, stamp], function(err, reply) { //cria sessão no servidor redis
+                    if (err) { //caso haja erro com o servidor redis:
                         res.send({ error: 'true', message: 'Problema com o login<br>Erro interno.' });
                     }
                 });
-                client.expire(sessionhash, 3600);//define duração de uma hora para uma sessão
+                client.expire(sessionhash, 3600); //define duração de uma hora para uma sessão
 
-            } else {//caso o hash gerado seja diferente do que o usuário informou:
+            } else { //caso o hash gerado seja diferente do que o usuário informou:
                 console.log("Login error!");
-                res.send({ error: 'true', message: 'Erro no login! Hash incorreto' });
+                res.send({ error: 'true', message: 'Erro no login! Senha incorreta' });
             }
-        } else {//caso usuário não seja encontrado:
+        } else { //caso usuário não seja encontrado:
             res.send({ error: 'true', message: 'Usuário não encontrado!' })
         }
     });
 });
 //Logout
-app.post('/logout/', function (req, res) {
-    let sessionhash = req.body.session;//recebe hash da sessão
-    client.del(sessionhash, function (err, reply) {//deleta sessão
-        if (err) {//caso erro:
+app.post('/logout/', function(req, res) {
+    let sessionhash = req.body.session; //recebe hash da sessão
+    client.del(sessionhash, function(err, reply) { //deleta sessão
+        if (err) { //caso erro:
             return res.send({ error: true, message: 'Falha ao Finalizar sessão' });
         }
-        return res.send({ error: false });//envia sinal para deletar cookies e redirecionar usuário
+        return res.send({ error: false }); //envia sinal para deletar cookies e redirecionar usuário
     });
 });
 //Pega dados da sessão
-app.post('/sessiondata', function (req, res) {
-    let sessionhash = req.body.session;//recebe hash da sessão
-    client.smembers(sessionhash, function (err, reply) {//recebe objeto com os membros do set
+app.post('/sessiondata', function(req, res) {
+    let sessionhash = req.body.session; //recebe hash da sessão
+    client.smembers(sessionhash, function(err, reply) { //recebe objeto com os membros do set
         if (err) {
             console.log(err);
             return res.status(500);
         }
-        if (reply) {//caso haja erro:
+        if (reply) { //caso haja erro:
             if (!reply[0]) {
                 return res.send({ error: true, message: "Sessão não encontrada", data: "undo" });
             } else {
-                return res.send({ error: false, data: reply });//envia objeto com os membros do set
+                return res.send({ error: false, data: reply }); //envia objeto com os membros do set
             }
         }
 
     });
 });
 //procurar nome de usuário por ID
-app.post('/usuario/', function (req, res) {
-    let usuario_id = req.body.id;//recebe id do usuário
-    if (!usuario_id) {//se id for vazio:
+app.post('/usuario/', function(req, res) {
+    let usuario_id = req.body.id; //recebe id do usuário
+    if (!usuario_id) { //se id for vazio:
         return res.status(400).send({ error: true, message: 'Informe um nome de usuário!' });
     }
-    dbConn.query('SELECT * FROM usuario where id=?', usuario_id, function (error, results, fields) {//query para buscar os dados do usuário no banco de dados mysql
-        if (error) {//se ocorrer erro, retorna. evita crash no servidor.
+    dbConn.query('SELECT * FROM usuario where id=?', usuario_id, function(error, results, fields) { //query para buscar os dados do usuário no banco de dados mysql
+        if (error) { //se ocorrer erro, retorna. evita crash no servidor.
             return res.status(500).send({ message: 'erro interno' });
         }
-        if (results[0]) {//caso encontre um usuário com o id informado:
-            return res.send({ error: false, data: results[0], message: 'Ok.' });//envia objeto com os dados do usuário
-        } else {//caso não encontre:
-            return res.send({ error: true, data: "Não encontrado!", message: 'Usuário não encontrado.' });//informa que não foi encontrado
+        if (results[0]) { //caso encontre um usuário com o id informado:
+            return res.send({ error: false, data: results[0], message: 'Ok.' }); //envia objeto com os dados do usuário
+        } else { //caso não encontre:
+            return res.send({ error: true, data: "Não encontrado!", message: 'Usuário não encontrado.' }); //informa que não foi encontrado
         }
     });
 });
 
 //Carregar postagens
-app.post('/post/', function (req, res) {
-    dbConn.query('SELECT * FROM post ORDER BY id DESC', function (error, results, fields) {//seleciona todas as postagens
-        if (error) {//caso ocorra erro:
-            return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash.
+app.post('/post/', function(req, res) {
+    dbConn.query('SELECT * FROM post ORDER BY id DESC', function(error, results, fields) { //seleciona todas as postagens
+        if (error) { //caso ocorra erro:
+            return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
         }
-        return res.send({ error: false, data: results });//envia objeto com as postagens
+        return res.send({ error: false, data: results }); //envia objeto com as postagens
     });
 });
 //Carrega projetos, mesmo funcionamento que o /post
-app.post('/proj/', function (req, res) {
-    dbConn.query('SELECT * FROM proj ORDER BY id DESC', function (error, results, fields) {//seleciona todos os projetos
-        if (error) {//caso erro:
-            return res.status(500).send({ message: 'erro interno' });//evia mensagem de erro, evita crash.
+app.post('/proj/', function(req, res) {
+    dbConn.query('SELECT * FROM proj ORDER BY id DESC', function(error, results, fields) { //seleciona todos os projetos
+        if (error) { //caso erro:
+            return res.status(500).send({ message: 'erro interno' }); //evia mensagem de erro, evita crash.
         }
-        return res.send({ error: false, data: results });//envia objeto com os projetos.
+        return res.send({ error: false, data: results }); //envia objeto com os projetos.
     });
 });
 //Carrega postagens de um determinado usuário
-app.post('/userpost/', function (req, res) {
-    dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC', req.body.uid, function (error, results, fields) {//seleciona todos os posts de um determinado usuário com base no id
-        if (error) {//caso haja erro:
-            return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash.
+app.post('/userpost/', function(req, res) {
+    dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC', req.body.uid, function(error, results, fields) { //seleciona todos os posts de um determinado usuário com base no id
+        if (error) { //caso haja erro:
+            return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
         }
-        return res.send({ error: false, data: results });//envia objeto com as postagens do usuário
+        return res.send({ error: false, data: results }); //envia objeto com as postagens do usuário
     });
 });
 //adicionar postagem
-app.post('/addpost/', function (req, res) {
-    let session_hash = req.body.session;    //|recebe o hash da sessão
+app.post('/addpost/', function(req, res) {
+    let session_hash = req.body.session; //|recebe o hash da sessão
     var usuario_id;
-    client.smembers(session_hash, function (err, reply) {
+    client.smembers(session_hash, function(err, reply) {
         if (err) {
             return res.status(500).send({ message: 'erro interno' });
         }
@@ -168,34 +164,34 @@ app.post('/addpost/', function (req, res) {
             if (reply[i].indexOf('_') > 0) {
                 usuario_id = reply[i].split("_").pop();
             }
-            dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {//seleciona as informações do usuário
-                if (error) {//caso haja erro:
-                    return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash;
+            dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function(error, results, fields) { //seleciona as informações do usuário
+                if (error) { //caso haja erro:
+                    return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash;
                 }
                 if (results[0]) {
                     var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
-                    var usuario_level = results[0].level;       //|
-                    if (usuario_confirmado == 1) {//caso usuário seja confirmado:
-                        if (usuario_level != 1) {//caso o usuário não tenha permissão para postar:
+                    var usuario_level = results[0].level; //|
+                    if (usuario_confirmado == 1) { //caso usuário seja confirmado:
+                        if (usuario_level != 1) { //caso o usuário não tenha permissão para postar:
                             return res.send({ error: 'true', data: "Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
-                        } else {//caso tenha permissão para postar:
+                        } else { //caso tenha permissão para postar:
                             const today = new Date();
                             const day = today.getDate();
                             const month = today.getMonth();
                             const year = today.getFullYear();
-                            let data1 = year + '-' + (month + 1) + '-' + day;//data da postagem
-                            dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo], function (error, results, fields) {//insere a postagem no banco de dados
-                                if (error) {//caso haja erro:
-                                    return res.send({ error: 'true', data: "Erro interno" });//envia mensagem de erro, evita crash.
+                            let data1 = year + '-' + (month + 1) + '-' + day; //data da postagem
+                            dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo], function(error, results, fields) { //insere a postagem no banco de dados
+                                if (error) { //caso haja erro:
+                                    return res.send({ error: 'true', data: "Erro interno" }); //envia mensagem de erro, evita crash.
                                 }
-                                return res.send({ error: 'false', data: "Post adicionado com sucesso!" });//envia mensagem de sucesso;
+                                return res.send({ error: 'false', data: "Post adicionado com sucesso!" }); //envia mensagem de sucesso;
                             })
                         }
                     } else {
-                        return res.send({ error: 'true', data: "Usuário não confirmado. Por favor, verifique seu email e tente novamente!" });//Pede para o usuário verificar email
+                        return res.send({ error: 'true', data: "Usuário não confirmado. Por favor, verifique seu email e tente novamente!" }); //Pede para o usuário verificar email
                     }
                 } else {
-                    return res.send({ error: 'true', data: "Usuário não encontrado!" });//Envia mensagem informando que o usuário informou um email incorreto
+                    return res.send({ error: 'true', data: "Usuário não encontrado!" }); //Envia mensagem informando que o usuário informou um email incorreto
                 }
             })
 
@@ -203,10 +199,10 @@ app.post('/addpost/', function (req, res) {
     });
 });
 //adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão
-app.post('/addproj/', function (req, res) {
-    let session_hash = req.body.session;    //|recebe o hash da sessão
+app.post('/addproj/', function(req, res) {
+    let session_hash = req.body.session; //|recebe o hash da sessão
     var usuario_id;
-    client.smembers(session_hash, function (err, reply) {
+    client.smembers(session_hash, function(err, reply) {
         if (err) {
             return res.status(500).send({ message: 'erro interno' });
         }
@@ -215,7 +211,7 @@ app.post('/addproj/', function (req, res) {
                 usuario_id = reply[i].split("_").pop();
             }
         }
-        dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) {
+        dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function(error, results, fields) {
             if (error) {
                 return res.status(500).send({ message: 'erro interno' });
             }
@@ -231,7 +227,7 @@ app.post('/addproj/', function (req, res) {
                         const month = today.getMonth();
                         const year = today.getFullYear();
                         let data1 = year + '-' + (month + 1) + '-' + day;
-                        dbConn.query("INSERT INTO `proj`(`nome`,`conteudo`,`data`,`autor`,`resumo`,`addr`) Values(?,?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo, req.body.addr], function (error, results, fields) {
+                        dbConn.query("INSERT INTO `proj`(`nome`,`conteudo`,`data`,`autor`,`resumo`,`addr`) Values(?,?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo, req.body.addr], function(error, results, fields) {
                             if (error) {
                                 throw error;
                             }
@@ -249,70 +245,65 @@ app.post('/addproj/', function (req, res) {
 });
 
 //confirmar conta de usuário
-app.post('/confirmar/', function (req, res) {
+app.post('/confirmar/', function(req, res) {
     let usuario_email = req.body.email;
-    let usuario_hash = req.body.hash;
-    if ((usuario_email) && (usuario_hash)) {//verifica se usuario informou hash e email
+    let usuario_senha = req.body.senha;
+    if ((usuario_email) && (usuario_senha)) { //verifica se usuario informou hash e email
         var usuario_nome;
-        var usuario_timestamp;
         var usuario_confirmado;
-        dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function (error, results, fields) {//procura usuário no banco
-            if (error) {//verifica erro
-                return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro
+        dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function(error, results, fields) { //procura usuário no banco
+            if (error) { //verifica erro
+                return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
             }
-            if (results[0]) {//se encontrou usuário
-                usuario_nome = results[0].nome;             //|
-                usuario_timestamp = results[0].pwdate;      //|Insere as informações encontradas no banco
+            if (results[0]) { //se encontrou usuário
+                usuario_nome = results[0].nome; //|
                 usuario_confirmado = results[0].confirmado; //|
-
-                //console.log(usuario_timestamp);
-                var str = usuario_nome + usuario_email;
-                var datb = usuario_timestamp + str;
                 const md5Hasher = crypto.createHmac("md5", secret);
-                const hash = md5Hasher.update(datb).digest("hex");//gera hash
-                if (usuario_confirmado == 0) {//verifica se usuário não foi confirmado
-                    if ((hash == usuario_hash)) {//verifica se os hashes são iguais
-                        let usuario_id = results[0].id;//popula id
+                const hash = md5Hasher.update(usuario_senha).digest("hex"); //gera hash
+                const senha = results[0].pw;
+                if (usuario_confirmado == 0) { //verifica se usuário não foi confirmado
+                    if ((hash == senha)) { //verifica se os hashes são iguais
+                        let usuario_id = results[0].id; //popula id
                         var query = 'UPDATE `db_web`.`usuario` SET `confirmado`="1" WHERE  `id`="' + usuario_id + '"';
-                        dbConn.query(query, function (error, results, fields) {//atualiza banco de dados 
-                            if (error) {//se ocorrer erro,
-                                return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro no servidor
+                        dbConn.query(query, function(error, results, fields) { //atualiza banco de dados 
+                            if (error) { //se ocorrer erro,
+                                return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro no servidor
                             }
-                            return res.send({ error: 'false', data: "Usuário confirmado com sucesso!" });//envia mensagem de sucesso.
+                            return res.send({ error: 'false', data: "Usuário confirmado com sucesso!" }); //envia mensagem de sucesso.
                         })
-                    } else {//se codigo hash informado for incorreto:
-                        return res.send({ error: 'true', data: "Código hash incorreto!" });//informa o usuário de que o mesmo informou um hash incorreto.
+                    } else { //se codigo hash informado for incorreto:
+                        return res.send({ error: 'true', data: "Senha incorreta!" }); //informa o usuário de que o mesmo informou um hash incorreto.
                     }
-                } else {//se usuário já foi confirmado:
-                    return res.send({ error: 'true', data: "Usuário já confirmado!" });//envia mensagem de que usuário já foi confirmado
+                } else { //se usuário já foi confirmado:
+                    return res.send({ error: 'true', data: "Usuário já confirmado!" }); //envia mensagem de que usuário já foi confirmado
                 }
-            } else {//caso usuário não seja encontrado:
-                return res.send({ error: 'true', data: "Usuário não encontrado!" });//envia mensagem de que usuário não foi encontrado
+            } else { //caso usuário não seja encontrado:
+                return res.send({ error: 'true', data: "Usuário não encontrado!" }); //envia mensagem de que usuário não foi encontrado
             }
         });
-    } else {//caso o usuário não tenha informado email ou senha:
-        return res.send({ error: 'true', data: "Informe nome de usuário e email!" });//envia mensagem de que falta campos:
+    } else { //caso o usuário não tenha informado email ou senha:
+        return res.send({ error: 'true', data: "Informe nome de usuário e email!" }); //envia mensagem de que falta campos:
     }
 });
 //Pedido para gerar novo hash
-app.post('/passwordrequest', function (req, res) {
+app.post('/passwordrequest', function(req, res) {
     let usuario_email = req.body.email;
     var queryv = "SELECT * FROM `usuario` WHERE email='" + usuario_email + "'";
-    dbConn.query(queryv, function (error, results, fields) {//busca as informações do usuário no banco de dados
-        if (error) {//se ocorrer erro:
-            return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash
+    dbConn.query(queryv, function(error, results, fields) { //busca as informações do usuário no banco de dados
+        if (error) { //se ocorrer erro:
+            return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash
         }
-        if (!results[0]) {//se não encontrar usuário:
-            return res.send({ error: true, data: "Usuário não encontrado!" });//envia mensagem de que usuário não foi encontrado
-        } else {//se encontrar:
+        if (!results[0]) { //se não encontrar usuário:
+            return res.send({ error: true, data: "Usuário não encontrado!" }); //envia mensagem de que usuário não foi encontrado
+        } else { //se encontrar:
             var data = new Date();
             const time = data.getTime();
             var datb = time + results[0].pwdate;
             const md5Hasher = crypto.createHmac("md5", secret);
-            const hash = md5Hasher.update(datb).digest("hex");//gera código para a solicitação
-            dbConn.query("INSERT INTO pcr(`id`,`id_usuario`) values(?,?)", [hash, results[0].id], function (error) {//insere a solicitação no banco de dados
-                if (error) {//se ocorrer erro:
-                    return res.status(500).send({ message: 'erro interno' });//envia mensagem de erro, evita crash
+            const hash = md5Hasher.update(datb).digest("hex"); //gera código para a solicitação
+            dbConn.query("INSERT INTO pcr(`id`,`id_usuario`) values(?,?)", [hash, results[0].id], function(error) { //insere a solicitação no banco de dados
+                if (error) { //se ocorrer erro:
+                    return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash
                 }
                 let transporter = nodemailer.createTransport({
                     host: 'mail.' + email_server,
@@ -322,36 +313,37 @@ app.post('/passwordrequest', function (req, res) {
                         user: 'suporte',
                         pass: email_pass
                     }
-                });//define configurações do servidor de email
+                }); //define configurações do servidor de email
 
                 let mailOptions = {
                     from: '"Suporte - Contas" <suporte@' + website + '>',
                     to: usuario_email,
                     subject: "Solicitação de alteração de senha",
                     //text: emailData.text,
-                    html: `<p>Olá, ` + results[0].nome + `!</p><br><h4>Seu link para fazer a alteração:</h4><br><a href='https://` + website + `/senha.html?pc=` + hash + `'>Mudar minha senha</a><br>
+                    html: `<p>Olá, ` + results[0].nome + `!</p><br><h4>Seu link para fazer a alteração:</h4><br><a href='https://` + website + `/novasenha.html?pc=` + hash + `'>Mudar minha senha</a><br>
                     <h4 style='color:orangered'>Caso não consiga clicar no link acima, copie o link: </h4><br><h4 style='color:blue'>https://` + website + `/novasenha.html?pc=` + hash + `</h4><br>
                     <h4>Caso não tenha solicitado uma alteração na sua senha, apenas ignore o email.</h4>
                     `
-                };//define opções de email
+                }; //define opções de email
 
                 //Envia email
                 transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {//se ocorrer erro:
-                        return console.log(error.message);//loga mensagem de erro
+                    if (error) { //se ocorrer erro:
+                        return console.log(error.message); //loga mensagem de erro
                     }
                     console.log('Message sent: %s', info.messageId);
                 });
-                return res.send({ error: false, data: "Email com link de alteração de senha enviado com sucesso!", message: "Ok." });//envia mensagem de sucesso e solicita que o usuário verifique o email.
+                return res.send({ error: false, data: "Email com link de alteração de senha enviado com sucesso!", message: "Ok." }); //envia mensagem de sucesso e solicita que o usuário verifique o email.
             });
         }
     });
 });
 //muda o hash
-app.post('/changepassword', function (req, res) {
+app.post('/changepassword', function(req, res) {
     let request_id = req.body.request_id;
+    let nsenha = req.body.senha;
     var queryv = "SELECT * FROM `pcr` WHERE id='" + request_id + "'";
-    dbConn.query(queryv, function (error, results, fields) {
+    dbConn.query(queryv, function(error, results, fields) {
         if (error) {
             return res.status(500).send({ message: 'erro interno' });
         }
@@ -361,43 +353,41 @@ app.post('/changepassword', function (req, res) {
             var data = new Date();
             const time = data.getTime();
             const dtime = time;
-            dbConn.query("UPDATE usuario SET `pwdate` = ? where `id` = ?", [time, results[0].id_usuario], function (error) {
+            dbConn.query("UPDATE usuario SET `pwdate` = ?, `pw` = ? where `id` = ?", [time, nsenha, results[0].id_usuario], function(error) {
                 if (error) {
                     return res.status(500).send({ error: true, message: 'Erro interno. Não Foi possível alterar sua senha.' });
                 }
-                dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function (error, resultsw) {
+                dbConn.query("SELECT `nome`, `email` from `usuario` where `id` = ?", results[0].id_usuario, function(error, resultsw) {
                     var str = resultsw[0].nome + resultsw[0].email;
                     var datb = dtime + str;
                     const md5Hasher = crypto.createHmac("md5", secret);
                     const hash = md5Hasher.update(datb).digest("hex");
-                    dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function (error) { });
+                    dbConn.query("DELETE from pcr where `id_usuario` = ?", results[0].id_usuario, function(error) {});
                     return res.send({ error: false, data: "Sucesso!<br>Sua nova senha é:<br><b>" + hash + "</b>", message: "Ok." });
                 });
 
-            }
-            );
+            });
         }
     });
 });
 
 //registrar novo usuário
-app.post('/register/', function (req, res) {
+app.post('/register/', function(req, res) {
     let usuario_nome = req.body.nome;
     let usuario_email = req.body.email;
     let imagem_usuario = req.body.imagem;
-    var str = usuario_nome + usuario_email;
+    let senha = req.body.senha;
     var data = new Date();
     const time = data.getTime();
-    var datb = time + str;
     const md5Hasher = crypto.createHmac("md5", secret);
-    const hash = md5Hasher.update(datb).digest("hex");
+    const hash = md5Hasher.update(senha).digest("hex");
     if ((!usuario_nome)) {
         return res.status(400).send({ error: true, message: 'informe um nome de usuário' });
     } else if ((!usuario_email)) {
         return res.status(400).send({ error: true, message: 'informe um email' });
     }
     var queryv = "SELECT * FROM `usuario` WHERE email='" + usuario_email + "'";
-    dbConn.query(queryv, function (error, results, fields) {
+    dbConn.query(queryv, function(error, results, fields) {
         if (error) {
             return res.status(500).send({ message: 'erro interno' });
         }
@@ -405,7 +395,7 @@ app.post('/register/', function (req, res) {
             return res.send({ error: true, data: "Usuário já existe!" });
         } else {
 
-            dbConn.query("INSERT INTO usuario(`nome`,`email`,`pwdate`,`image`) values(?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario], function (error) {
+            dbConn.query("INSERT INTO usuario(`nome`,`email`,`pwdate`,`image`,`pw`) values(?,?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario, hash], function(error) {
                 if (error) {
                     return res.status(500).send({ message: 'erro interno' });
                 }
@@ -434,20 +424,20 @@ app.post('/register/', function (req, res) {
                     }
                     console.log('Message sent: %s', info.messageId);
                 });
-                return res.send({ error: false, data: hash, message: "Ok." });
+                return res.send({ error: false, data: "Registro realizado com sucesso!", message: "Ok." });
             });
         }
     });
 });
 
-app.listen(process.env.PORT || 5000, function () {
+app.listen(process.env.PORT || 5000, function() {
     for (var i = 0; i < 50; i++) {
         process.stdout.write(".");
     }
     console.log("\nServidor iniciado...");
 
 });
-client.on('connect', function () {
+client.on('connect', function() {
     console.log('connected');
 });
 module.exports = app;
