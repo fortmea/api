@@ -50,7 +50,6 @@ app.post('/login/', function(req, res) {
         if (results[0]) { //caso haja usuário cadastrado com o email informado
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(usuario_senha).digest("hex"); //gera hash do usuário
-            console.log(hash);
             if (hash == results[0].pw) {
                 var ip = req.header('x-forwarded-for') || req.remoteAddress; //pega ip do usuário
                 var data = new Date();
