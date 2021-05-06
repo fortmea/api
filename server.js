@@ -50,6 +50,7 @@ app.post('/login/', function(req, res) {
         if (results[0]) { //caso haja usuário cadastrado com o email informado
             const md5Hasher = crypto.createHmac("md5", secret);
             const hash = md5Hasher.update(usuario_senha).digest("hex"); //gera hash do usuário
+            console.log(hash);
             if (hash == results[0].pw) {
                 var ip = req.header('x-forwarded-for') || req.remoteAddress; //pega ip do usuário
                 var data = new Date();
@@ -65,17 +66,17 @@ app.post('/login/', function(req, res) {
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
                 client.sadd([sessionhash, "id_" + results[0].id, ip, stamp], function(err, reply) { //cria sessão no servidor redis
                     if (err) { //caso haja erro com o servidor redis:
-                        res.send({ error: 'true', message: 'Problema com o login<br>Erro interno.' });
+                        res.send({ error: 'true', message: '<br>Erro interno.' });
                     }
                 });
                 client.expire(sessionhash, 3600); //define duração de uma hora para uma sessão
 
             } else { //caso o hash gerado seja diferente do que o usuário informou:
                 console.log("Login error!");
-                res.send({ error: 'true', message: 'Erro no login! Senha incorreta' });
+                res.send({ error: 'true', message: '<br>Senha incorreta' });
             }
         } else { //caso usuário não seja encontrado:
-            res.send({ error: 'true', message: 'Usuário não encontrado!' })
+            res.send({ error: 'true', message: '<br>Usuário não encontrado!' })
         }
     });
 });
