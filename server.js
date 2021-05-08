@@ -429,7 +429,25 @@ app.post('/register/', function(req, res) {
         }
     });
 });
-
+//verificar existência e enviar dados sobre pedido de mudança de senha
+app.post('/pcr/', function(req, res) {
+    let pcr = req.body.pcr;
+    if (pcr) {
+        var queryv = "SELECT u.email as 'email' FROM `pcr` p INNER JOIN `usuario` u ON(p.id_usuario=u.id) WHERE id='" + prc + "'";
+        dbConn.query(queryv, function(error, results, fields) {
+            if (error) {
+                return res.status(500).send({ message: 'erro interno' });
+            }
+            if (!results[0]) {
+                return res.send({ error: true, data: "Link inválido!<br>Talvez você já tenha usado-o. Caso queira gerar uma nova senha,<br>faça uma nova soliciatação e verifique seu email." });
+            } else {
+                res.send({ error: false, data: results[0].email });
+            }
+        });
+    } else {
+        res.send({ erro: true, data: "Informe um código." })
+    }
+});
 app.listen(process.env.PORT || 5000, function() {
     for (var i = 0; i < 50; i++) {
         process.stdout.write(".");
