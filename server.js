@@ -433,7 +433,7 @@ app.post('/register/', function(req, res) {
 app.post('/pcr/', function(req, res) {
     let pcr = req.body.pcr;
     if (pcr) {
-        var queryv = "SELECT u.email as 'email' FROM `pcr` p INNER JOIN `usuario` u ON(p.id_usuario=u.id) WHERE id='" + pcr + "'";
+        var queryv = "SELECT u.email as 'email' FROM `pcr` p INNER JOIN `usuario` u ON(p.id_usuario=u.id) WHERE p.id='" + pcr + "'";
         dbConn.query(queryv, function(error, results, fields) {
             if (error) {
                 return res.status(500).send({ message: 'erro interno' });
