@@ -164,9 +164,9 @@ app.post('/userpost/', function(req, res) {
                     if (error) { //caso haja erro:
                         return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
                     }
-                    for (var i = 0; i < session_info.length; i++) {
-                        if (session_info[i].indexOf('_') > 0) {
-                            let id = session_info[i].split("_").pop();
+                    for (var i = 0; i < reply.length; i++) {
+                        if (reply[i].indexOf('_') > 0) {
+                            let id = reply[i].split("_").pop();
                             if (req.body.uid == id) {
                                 return res.send({ error: false, data: results, is_owner: true }); //envia objeto com as postagens do usuário
                             } else {
