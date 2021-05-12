@@ -145,12 +145,41 @@ app.post('/proj/', function(req, res) {
 });
 //Carrega postagens de um determinado usuário
 app.post('/userpost/', function(req, res) {
-    dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC', req.body.uid, function(error, results, fields) { //seleciona todos os posts de um determinado usuário com base no id
-        if (error) { //caso haja erro:
-            return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
+    let sessionhash = req.body.session; //recebe hash da sessão
+    client.smembers(sessionhash, function(err, reply) { //recebe objeto com os membros do set
+        if (err) {
+            console.log(err);
+            return res.status(500);
         }
-        return res.send({ error: false, data: results }); //envia objeto com as postagens do usuário
+        if (reply) { //caso haja erro:
+            if (!reply[0]) {
+                dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC', req.body.uid, function(error, results, fields) { //seleciona todos os posts de um determinado usuário com base no id
+                    if (error) { //caso haja erro:
+                        return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
+                    }
+                    return res.send({ error: false, data: results, is_owner: false }); //envia objeto com as postagens do usuário
+                });
+            } else {
+                dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC', req.body.uid, function(error, results, fields) { //seleciona todos os posts de um determinado usuário com base no id
+                    if (error) { //caso haja erro:
+                        return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
+                    }
+                    for (var i = 0; i < session_info.length; i++) {
+                        if (session_info[i].indexOf('_') > 0) {
+                            let id = session_info[i].split("_").pop();
+                            if (req.body.uid == id) {
+                                return res.send({ error: false, data: results, is_owner: true }); //envia objeto com as postagens do usuário
+                            } else {
+                                return res.send({ error: false, data: results, is_owner: false }); //envia objeto com as postagens do usuário
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
     });
+
 });
 //adicionar postagem
 app.post('/addpost/', function(req, res) {
@@ -323,7 +352,7 @@ app.post('/passwordrequest', function(req, res) {
                     html: `<p>Olá, ` + results[0].nome + `!</p><br><h4>Seu link para fazer a alteração:</h4><br><a href='https://` + website + `/novasenha.html?pc=` + hash + `'>Mudar minha senha</a><br>
                     <h4 style='color:orangered'>Caso não consiga clicar no link acima, copie o link: </h4><br><h4 style='color:blue'>https://` + website + `/novasenha.html?pc=` + hash + `</h4><br>
                     <h4>Caso não tenha solicitado uma alteração na sua senha, apenas ignore o email.</h4>
-                    `
+                            `
                 }; //define opções de email
 
                 //Envia email
@@ -380,7 +409,8 @@ app.post('/register/', function(req, res) {
     const hash = md5Hasher.update(senha).digest("hex");
     if ((!usuario_nome)) {
         return res.status(400).send({ error: true, message: 'informe um nome de usuário' });
-    } else if ((!usuario_email)) {
+    } else
+    if ((!usuario_email)) {
         return res.status(400).send({ error: true, message: 'informe um email' });
     }
     var queryv = "SELECT * FROM `usuario` WHERE email='" + usuario_email + "'";
@@ -445,14 +475,12 @@ app.post('/pcr/', function(req, res) {
         res.send({ erro: true, data: "Informe um código." })
     }
 });
+
 app.listen(process.env.PORT || 5000, function() {
     for (var i = 0; i < 50; i++) {
         process.stdout.write(".");
     }
     console.log("\nServidor iniciado...");
-
 });
-client.on('connect', function() {
-    console.log('connected');
-});
+client.on('connect', function() {});
 module.exports = app;
