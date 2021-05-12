@@ -145,7 +145,7 @@ app.post('/proj/', function(req, res) {
 });
 //Carrega postagens de um determinado usuário
 app.post('/userpost/', function(req, res) {
-    let sessionhash = req.body.session; //recebe hash da sessão
+    let sessionhash = req.body.session||0; //recebe hash da sessão
     client.smembers(sessionhash, function(err, reply) { //recebe objeto com os membros do set
         if (err) {
             console.log(err);
