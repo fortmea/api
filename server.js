@@ -195,7 +195,7 @@ app.post('/addpost/', function (req, res) {
             }
             dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) { //seleciona as informações do usuário
                 if (error) { //caso haja erro:
-                    return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash;
+                    return res.status(400).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash;
                 }
                 if (results[0]) {
                     var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
