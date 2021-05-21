@@ -129,7 +129,7 @@ app.post('/usuario/', function (req, res) {
 app.post('/post/', function (req, res) {
     dbConn.query('SELECT * FROM post ORDER BY id DESC', function (error, results, fields) { //seleciona todas as postagens
         if (error) { //caso ocorra erro:
-            return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
+            return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
         }
         return res.send({ error: false, data: results }); //envia objeto com as postagens
     });
@@ -138,7 +138,7 @@ app.post('/post/', function (req, res) {
 app.post('/proj/', function (req, res) {
     dbConn.query('SELECT * FROM proj ORDER BY id DESC', function (error, results, fields) { //seleciona todos os projetos
         if (error) { //caso erro:
-            return res.status(500).send({ message: 'erro interno' }); //evia mensagem de erro, evita crash.
+            return res.status(500).send({ message: 'erro interno' }); //evia mensagem de erro
         }
         return res.send({ error: false, data: results }); //envia objeto com os projetos.
     });
@@ -155,14 +155,14 @@ app.post('/userpost/', function (req, res) {
             if (!reply[0]) {
                 dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC', req.body.uid, function (error, results, fields) { //seleciona todos os posts de um determinado usuário com base no id
                     if (error) { //caso haja erro:
-                        return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
+                        return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
                     }
                     return res.send({ error: false, data: results, is_owner: false }); //envia objeto com as postagens do usuário
                 });
             } else {
                 dbConn.query('SELECT * FROM post WHERE `autor` = ? ORDER BY id DESC', req.body.uid, function (error, results, fields) { //seleciona todos os posts de um determinado usuário com base no id
                     if (error) { //caso haja erro:
-                        return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash.
+                        return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
                     }
                     for (var i = 0; i < reply.length; i++) {
                         if (reply[i].indexOf('_') > 0) {
@@ -193,9 +193,10 @@ app.post('/addpost/', function (req, res) {
             if (reply[i].indexOf('_') > 0) {
                 usuario_id = reply[i].split("_").pop();
             }
+            console.log(usuario_id);
             dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) { //seleciona as informações do usuário
                 if (error) { //caso haja erro:
-                    return res.status(400).send({ message: 'erro interno' }); //envia mensagem de erro, evita crash;
+                    return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
                 }
                 if (results[0]) {
                     var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
@@ -211,7 +212,7 @@ app.post('/addpost/', function (req, res) {
                             let data1 = year + '-' + (month + 1) + '-' + day; //data da postagem
                             dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo], function (error, results, fields) { //insere a postagem no banco de dados
                                 if (error) { //caso haja erro:
-                                    return res.send({ error: 'true', data: "Erro interno" }); //envia mensagem de erro, evita crash.
+                                    return res.send({ error: 'true', data: "Erro interno" }); //envia mensagem de erro
                                 }
                                 return res.send({ error: 'false', data: "Post adicionado com sucesso!" }); //envia mensagem de sucesso;
                             })
