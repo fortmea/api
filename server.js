@@ -193,39 +193,37 @@ app.post('/addpost/', function (req, res) {
             if (reply[i].indexOf('_') > 0) {
                 usuario_id = reply[i].split("_").pop();
             }
-            console.log(usuario_id);
-            dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) { //seleciona as informações do usuário
-                if (error) { //caso haja erro:
-                    return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
-                }
-                if (results[0]) {
-                    var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
-                    var usuario_level = results[0].level; //|
-                    if (usuario_confirmado == 1) { //caso usuário seja confirmado:
-                        if (usuario_level != 1) { //caso o usuário não tenha permissão para postar:
-                            return res.send({ error: 'true', data: "Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
-                        } else { //caso tenha permissão para postar:
-                            const today = new Date();
-                            const day = today.getDate();
-                            const month = today.getMonth();
-                            const year = today.getFullYear();
-                            let data1 = year + '-' + (month + 1) + '-' + day; //data da postagem
-                            dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo], function (error, results, fields) { //insere a postagem no banco de dados
-                                if (error) { //caso haja erro:
-                                    return res.send({ error: 'true', data: "Erro interno" }); //envia mensagem de erro
-                                }
-                                return res.send({ error: 'false', data: "Post adicionado com sucesso!" }); //envia mensagem de sucesso;
-                            })
-                        }
-                    } else {
-                        return res.send({ error: 'true', data: "Usuário não confirmado. Por favor, verifique seu email e tente novamente!" }); //Pede para o usuário verificar email
+        }
+        dbConn.query('SELECT `confirmado`,`level` FROM `usuario` where `id`=?', usuario_id, function (error, results, fields) { //seleciona as informações do usuário
+            if (error) { //caso haja erro:
+                return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
+            }
+            if (results[0]) {
+                var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
+                var usuario_level = results[0].level; //|
+                if (usuario_confirmado == 1) { //caso usuário seja confirmado:
+                    if (usuario_level != 1) { //caso o usuário não tenha permissão para postar:
+                        return res.send({ error: 'true', data: "Usuário não tem permissão para fazer publicações!<br>Caso discorde disso, entre em contato em <a href='mailto:suporte@" + email_server + "'>suporte@" + email_server + "</a> ou <a href='mailto:" + admin + "@" + email_server + "'>" + admin + "@" + email_server + "</a>." });
+                    } else { //caso tenha permissão para postar:
+                        const today = new Date();
+                        const day = today.getDate();
+                        const month = today.getMonth();
+                        const year = today.getFullYear();
+                        let data1 = year + '-' + (month + 1) + '-' + day; //data da postagem
+                        dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo], function (error, results, fields) { //insere a postagem no banco de dados
+                            if (error) { //caso haja erro:
+                                return res.send({ error: 'true', data: "Erro interno" }); //envia mensagem de erro
+                            }
+                            return res.send({ error: 'false', data: "Post adicionado com sucesso!" }); //envia mensagem de sucesso;
+                        })
                     }
                 } else {
-                    return res.send({ error: 'true', data: "Usuário não encontrado!" }); //Envia mensagem informando que o usuário informou um email incorreto
+                    return res.send({ error: 'true', data: "Usuário não confirmado. Por favor, verifique seu email e tente novamente!" }); //Pede para o usuário verificar email
                 }
-            })
-
-        }
+            } else {
+                return res.send({ error: 'true', data: "Usuário não encontrado!" }); //Envia mensagem informando que o usuário informou um email incorreto
+            }
+        })
     });
 });
 //adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão
