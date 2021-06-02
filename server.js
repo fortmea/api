@@ -134,6 +134,24 @@ app.post('/post/', function (req, res) {
         return res.send({ error: false, data: results }); //envia objeto com as postagens
     });
 });
+//Carregar postagem específica
+app.post('/uniquepost/', function (req, res) {
+    console.log(req.body.id);
+    if ((req.body.id != null) && (req.body.id != "")) {
+        dbConn.query('SELECT * FROM post WHERE id = ?', req.body.id, function (error, results, fields) { //seleciona todas as postagens
+            if (error) { //caso ocorra erro:
+                return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
+            }
+            if (results) {
+                return res.send({ error: false, data: results }); //envia objeto com a postagem
+            } else {
+                return res.send({ error: true }); //envia mensagem de erro
+            }
+        });
+    }else{
+        return res.send({ error: true }); //envia mensagem de erro
+    }
+});
 //Carrega projetos, mesmo funcionamento que o /post
 app.post('/proj/', function (req, res) {
     dbConn.query('SELECT * FROM proj ORDER BY id DESC', function (error, results, fields) { //seleciona todos os projetos
@@ -443,6 +461,7 @@ app.post('/register/', function (req, res) {
     let usuario_email = req.body.email;
     let imagem_usuario = req.body.imagem;
     let senha = req.body.senha;
+    let cominf = req.body.cominf;
     var data = new Date();
     const time = data.getTime();
     const md5Hasher = crypto.createHmac("md5", secret);
@@ -462,7 +481,7 @@ app.post('/register/', function (req, res) {
             return res.send({ error: true, data: "Usuário já existe!" });
         } else {
 
-            dbConn.query("INSERT INTO usuario(`nome`,`email`,`pwdate`,`image`,`pw`) values(?,?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario, hash], function (error) {
+            dbConn.query("INSERT INTO usuario(`nome`,`email`,`pwdate`,`image`,`pw`,`cominf`) values(?,?,?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario, hash, cominf], function (error) {
                 if (error) {
                     return res.status(500).send({ message: 'erro interno' });
                 }
