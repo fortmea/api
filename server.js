@@ -433,6 +433,7 @@ app.post('/delete/', function (req, res) {
                         usuario_level = reply[i].split("@").pop();
                     }
                 }
+                console.log(usuario_level);
                 if (reply) {
                     if (!reply[0]) {
                         return res.send({ error: true, message: "Sessão não encontrada", data: "undo" });
