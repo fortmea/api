@@ -143,7 +143,7 @@ app.post('/uniquepost/', function (req, res) {
                 return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
             }
             if (results) {
-                return res.send({ error: false, data: results }); //envia objeto com a postagem
+                return res.send({ error: false, data: results[0] }); //envia objeto com a postagem
             } else {
                 return res.send({ error: true }); //envia mensagem de erro
             }
