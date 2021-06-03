@@ -63,7 +63,7 @@ app.post('/login/', function (req, res) {
                 var stamp = data.toISOString().replace(/T/, " ").replace(/:00.000Z/, "");
                 stamp = stamp.replace("00:00", "");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([sessionhash, "id_" + results[0].id, ip, stamp], function (err, reply) { //cria sessão no servidor redis
+                client.sadd([sessionhash, "id_" + results[0].id, ip, stamp, "level@"+results[0].level], function (err, reply) { //cria sessão no servidor redis
                     if (err) { //caso haja erro com o servidor redis:
                         res.send({ error: 'true', message: '<br>Erro interno.' });
                     }
@@ -418,6 +418,7 @@ app.post('/delete/', function (req, res) {
     let post = req.body.post;
     let session = req.body.session;
     var usuario_id;
+    var usuario_level;
     if ((post) && (session)) {
         client.smembers(session, function (err, reply) { //recebe objeto com os membros do set
             if (err) {
@@ -428,13 +429,16 @@ app.post('/delete/', function (req, res) {
                     if (reply[i].indexOf('_') > 0) {
                         usuario_id = reply[i].split("_").pop();
                     }
+                    if (reply[i].indexOf('@') > 0) {
+                        usuario_level = reply[i].split("@").pop();
+                    }
                 }
                 if (reply) {
                     if (!reply[0]) {
                         return res.send({ error: true, message: "Sessão não encontrada", data: "undo" });
                     } else {
                         dbConn.query("SELECT * FROM `post` WHERE id= ? ", post, function (error, results, fields) {
-                            if (results[0].autor == usuario_id) {
+                            if (results[0].autor == usuario_id||usuario_level==2) {
                                 dbConn.query("DELETE from post where `id` = ?", post, function (error) {
                                     if (error) {
                                         res.status(500).send();
