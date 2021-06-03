@@ -148,7 +148,7 @@ app.post('/uniquepost/', function (req, res) {
                 return res.send({ error: true }); //envia mensagem de erro
             }
         });
-    }else{
+    } else {
         return res.send({ error: true }); //envia mensagem de erro
     }
 });
@@ -467,11 +467,15 @@ app.post('/register/', function (req, res) {
     const md5Hasher = crypto.createHmac("md5", secret);
     const hash = md5Hasher.update(senha).digest("hex");
     if ((!usuario_nome)) {
-        return res.status(400).send({ error: true, message: 'informe um nome de usuário' });
+        return res.status(400).send({ error: true, message: 'informe um nome de usuário.' });
     } else
         if ((!usuario_email)) {
-            return res.status(400).send({ error: true, message: 'informe um email' });
+            return res.status(400).send({ error: true, message: 'informe um email.' });
         }
+        else
+            if ((!senha)) {
+                return res.status(400).send({ error: true, message: 'informe uma senha.' });
+            }
     var queryv = "SELECT * FROM `usuario` WHERE email='" + usuario_email + "'";
     dbConn.query(queryv, function (error, results, fields) {
         if (error) {
