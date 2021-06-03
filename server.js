@@ -127,7 +127,7 @@ app.post('/usuario/', function (req, res) {
 
 //Carregar postagens
 app.post('/post/', function (req, res) {
-    dbConn.query('SELECT * FROM post ORDER BY id DESC', function (error, results, fields) { //seleciona todas as postagens
+    dbConn.query('SELECT * FROM post WHERE visibilidade = 1 ORDER BY id DESC', function (error, results, fields) { //seleciona todas as postagens
         if (error) { //caso ocorra erro:
             return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
         }
@@ -433,7 +433,6 @@ app.post('/delete/', function (req, res) {
                         usuario_level = reply[i].split("@").pop();
                     }
                 }
-                console.log(usuario_level);
                 if (reply) {
                     if (!reply[0]) {
                         return res.send({ error: true, message: "Sessão não encontrada", data: "undo" });
