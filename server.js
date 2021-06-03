@@ -293,7 +293,7 @@ app.post('/addproj/', function (req, res) {
 //confirmar conta de usuário
 app.post('/confirmar/', function (req, res) {
     let usuario_email = req.body.email;
-    let usuario_senha = req.body.senha;
+    let usuario_senha = req.body.hash;
     if ((usuario_email) && (usuario_senha)) { //verifica se usuario informou hash e email
         var usuario_nome;
         var usuario_confirmado;
