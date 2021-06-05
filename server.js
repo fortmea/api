@@ -63,7 +63,7 @@ app.post('/login/', function (req, res) {
                 var stamp = data.toISOString().replace(/T/, " ").replace(/:00.000Z/, "");
                 stamp = stamp.replace("00:00", "");
                 res.send({ error: 'false', message: 'Logado com sucesso!', data: sessionhash });
-                client.sadd([sessionhash, "id_" + results[0].id, ip, stamp, "level@"+results[0].level], function (err, reply) { //cria sessão no servidor redis
+                client.sadd([sessionhash, "id_" + results[0].id, ip, stamp, "level@" + results[0].level], function (err, reply) { //cria sessão no servidor redis
                     if (err) { //caso haja erro com o servidor redis:
                         res.send({ error: 'true', message: '<br>Erro interno.' });
                     }
@@ -438,7 +438,7 @@ app.post('/delete/', function (req, res) {
                         return res.send({ error: true, message: "Sessão não encontrada", data: "undo" });
                     } else {
                         dbConn.query("SELECT * FROM `post` WHERE id= ? ", post, function (error, results, fields) {
-                            if (results[0].autor == usuario_id||usuario_level==2) {
+                            if (results[0].autor == usuario_id || usuario_level == 2) {
                                 dbConn.query("DELETE from post where `id` = ?", post, function (error) {
                                     if (error) {
                                         res.status(500).send();
@@ -489,36 +489,42 @@ app.post('/register/', function (req, res) {
             return res.send({ error: true, data: "Usuário já existe!" });
         } else {
 
-            dbConn.query("INSERT INTO usuario(`nome`,`email`,`pwdate`,`image`,`pw`,`cominf`) values(?,?,?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario, hash, cominf], function (error) {
+            dbConn.query("INSERT INTO usuario(`nome`,`email`,`pwdate`,`image`,`pw`,`cominf`) values(?,?,?,?,?,?)", [usuario_nome, usuario_email, time, imagem_usuario, hash, cominf], function (error, resultsins) {
                 if (error) {
                     return res.status(500).send({ message: 'erro interno' });
                 }
-                let transporter = nodemailer.createTransport({
-                    host: 'mail.' + email_server,
-                    port: 465,
-                    secure: true,
-                    auth: {
-                        user: 'suporte',
-                        pass: email_pass
-                    }
-                });
-
-                let mailOptions = {
-                    from: '"Suporte - Contas" <suporte@' + website + '>',
-                    to: usuario_email,
-                    subject: "Confirme seu endereço de email",
-                    //text: emailData.text,
-                    html: "<p>Olá, " + usuario_nome + "!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='https://" + website + "/confirmar.html'>Confirmar</a>"
-                };
-
-                // send mail with defined transport object
-                transporter.sendMail(mailOptions, (error, info) => {
+                const hashacr = md5Hasher.update(time + usuario_email).digest("hex");
+                dbConn.query("INSERT INTO acr(`id_acr`,`usuario`) values(?,?)", [hashacr, resultsins.insertId], function (error) {
                     if (error) {
-                        return console.log(error.message);
+                        return res.status(500).send({ message: 'erro interno' });
                     }
-                    console.log('Message sent: %s', info.messageId);
+                    let transporter = nodemailer.createTransport({
+                        host: 'mail.' + email_server,
+                        port: 465,
+                        secure: true,
+                        auth: {
+                            user: 'suporte',
+                            pass: email_pass
+                        }
+                    });
+
+                    let mailOptions = {
+                        from: '"Suporte - Contas" <suporte@' + website + '>',
+                        to: usuario_email,
+                        subject: "Confirme seu endereço de email",
+                        //text: emailData.text,
+                        html: "<p>Olá, " + usuario_nome + "!</p><br><h4>Confirme seu email no link abaixo:</h4><br><a href='https://" + website + "/confirmar.html?acr=" + hashacr + "'>Confirmar</a>"
+                    };
+
+                    // send mail with defined transport object
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            return console.log(error.message);
+                        }
+                        console.log('Message sent: %s', info.messageId);
+                    });
+                    return res.send({ error: false, data: "Registro realizado com sucesso!", message: "Ok." });
                 });
-                return res.send({ error: false, data: "Registro realizado com sucesso!", message: "Ok." });
             });
         }
     });
