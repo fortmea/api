@@ -292,24 +292,21 @@ app.post('/addproj/', function (req, res) {
 
 //confirmar conta de usuário
 app.post('/confirmar/', function (req, res) {
-    let usuario_email = req.body.email;
-    let usuario_senha = req.body.hash;
-    if ((usuario_email) && (usuario_senha)) { //verifica se usuario informou hash e email
-        var usuario_nome;
+    let acr = req.body.acr;
+    if (acr) { //verifica input
         var usuario_confirmado;
-        dbConn.query('SELECT * FROM `usuario` where `email`=?', usuario_email, function (error, results, fields) { //procura usuário no banco
+        dbConn.query('SELECT * FROM `acr` where `id_acr`=?', acr, function (error, results, fields) { //procura usuário no banco
             if (error) { //verifica erro
                 return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
             }
             if (results[0]) { //se encontrou usuário
-                usuario_nome = results[0].nome; //|
-                usuario_confirmado = results[0].confirmado; //|
-                const md5Hasher = crypto.createHmac("md5", secret);
-                const hash = md5Hasher.update(usuario_senha).digest("hex"); //gera hash
-                const senha = results[0].pw;
-                if (usuario_confirmado == 0) { //verifica se usuário não foi confirmado
-                    if ((hash == senha)) { //verifica se os hashes são iguais
-                        let usuario_id = results[0].id; //popula id
+                dbConn.query('SELECT * FROM `usuario` where `id`=?', results[0].usuario, function (error, resultsacr, fields) { //procura usuário no banco
+                    if (error) { //verifica erro
+                        return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
+                    }
+                    usuario_confirmado = resultsacr[0].confirmado; //|
+                    if (usuario_confirmado == 0) { //verifica se usuário não foi confirmado
+                        let usuario_id = results[0].usuario; //popula id
                         var query = 'UPDATE `db_web`.`usuario` SET `confirmado`="1" WHERE  `id`="' + usuario_id + '"';
                         dbConn.query(query, function (error, results, fields) { //atualiza banco de dados 
                             if (error) { //se ocorrer erro,
@@ -317,18 +314,17 @@ app.post('/confirmar/', function (req, res) {
                             }
                             return res.send({ error: 'false', data: "Usuário confirmado com sucesso!" }); //envia mensagem de sucesso.
                         })
-                    } else { //se codigo hash informado for incorreto:
-                        return res.send({ error: 'true', data: "Senha incorreta!" }); //informa o usuário de que o mesmo informou um hash incorreto.
+
+                    } else { //se usuário já foi confirmado:
+                        return res.send({ error: 'true', data: "Usuário já confirmado!" }); //envia mensagem de que usuário já foi confirmado
                     }
-                } else { //se usuário já foi confirmado:
-                    return res.send({ error: 'true', data: "Usuário já confirmado!" }); //envia mensagem de que usuário já foi confirmado
-                }
+                });
             } else { //caso usuário não seja encontrado:
                 return res.send({ error: 'true', data: "Usuário não encontrado!" }); //envia mensagem de que usuário não foi encontrado
             }
         });
     } else { //caso o usuário não tenha informado email ou senha:
-        return res.send({ error: 'true', data: "Informe nome de usuário e email!" }); //envia mensagem de que falta campos:
+        return res.send({ error: 'true', data: "Ação incorreta!" }); //envia mensagem de que falta campos:
     }
 });
 //Pedido para gerar novo hash
