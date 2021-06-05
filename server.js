@@ -489,6 +489,7 @@ app.post('/register/', function (req, res) {
                 if (error) {
                     return res.status(500).send({ message: 'erro interno' });
                 }
+                const md5Hasher = crypto.createHmac("md5", secret);
                 const hashacr = md5Hasher.update(time + usuario_email).digest("hex");
                 dbConn.query("INSERT INTO acr(`id_acr`,`usuario`) values(?,?)", [hashacr, resultsins.insertId], function (error) {
                     if (error) {
