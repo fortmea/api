@@ -219,6 +219,7 @@ app.post('/addpost/', function (req, res) {
             if (results[0]) {
                 var usuario_confirmado = results[0].confirmado; //|insere as informações obtidas do Banco de Dados MySql
                 var usuario_level = results[0].level; //|
+                console.log(usuario_id);
                 console.log(usuario_level);
                 if (usuario_confirmado == 1) { //caso usuário seja confirmado:
                     if (usuario_level < 1) { //caso o usuário não tenha permissão para postar:
