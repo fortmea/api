@@ -127,7 +127,7 @@ app.post('/usuario/', function (req, res) {
 
 //Carregar postagens
 app.post('/post/', function (req, res) {
-    dbConn.query('SELECT p.id as id, p.nome as nome, p.conteudo as conteudo, p.data as data, p.autor as autor, p.resumo, u.nome as username, u.image as userimage FROM post p WHERE visibilidade = 1 INNER JOIN usuario u ON (u.id = p.autor) ORDER BY id DESC', function (error, results, fields) { //seleciona todas as postagens
+    dbConn.query('SELECT p.id as id, p.nome as nome, p.conteudo as conteudo, p.data as data, p.autor as autor, p.resumo, u.nome as username, u.image as userimage FROM post p INNER JOIN usuario u ON (u.id = p.autor)  WHERE visibilidade = 1 ORDER BY id DESC', function (error, results, fields) { //seleciona todas as postagens
         if (error) { //caso ocorra erro:
             return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
         }
