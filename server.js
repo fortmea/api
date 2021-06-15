@@ -154,7 +154,7 @@ app.post('/uniquepost/', function (req, res) {
 });
 //Carrega projetos, mesmo funcionamento que o /post
 app.post('/proj/', function (req, res) {
-    dbConn.query('SELECT * FROM `post` WHERE `proj` = 1 ORDER BY id DESC', function (error, results, fields) { //seleciona todos os projetos
+    dbConn.query('SELECT p.id as id, p.nome as nome, p.conteudo as conteudo, p.data as data, p.autor as autor, p.resumo, u.nome as username, u.image as userimage FROM post p INNER JOIN usuario u ON (u.id = p.autor)  WHERE proj = 1 ORDER BY id DESC', function (error, results, fields) { //seleciona todos os projetos
         if (error) { //caso erro:
             return res.status(500).send({ message: 'erro interno' }); //evia mensagem de erro
         }
