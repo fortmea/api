@@ -127,7 +127,7 @@ app.post('/usuario/', function (req, res) {
 
 //Carregar postagens
 app.post('/post/', function (req, res) {
-    dbConn.query('SELECT * FROM post WHERE visibilidade = 1 ORDER BY id DESC', function (error, results, fields) { //seleciona todas as postagens
+    dbConn.query('SELECT p.id as id, p.nome as nome, p.conteudo as conteudo, p.data as data, p.autor as autor, p.resumo, u.nome as username, u.image as userimage FROM post p WHERE visibilidade = 1 INNER JOIN usuario u ON (u.id = p.autor) ORDER BY id DESC', function (error, results, fields) { //seleciona todas as postagens
         if (error) { //caso ocorra erro:
             return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
         }
@@ -154,7 +154,7 @@ app.post('/uniquepost/', function (req, res) {
 });
 //Carrega projetos, mesmo funcionamento que o /post
 app.post('/proj/', function (req, res) {
-    dbConn.query('SELECT * FROM proj ORDER BY id DESC', function (error, results, fields) { //seleciona todos os projetos
+    dbConn.query('SELECT * FROM `post` WHERE `proj` = 1 ORDER BY id DESC', function (error, results, fields) { //seleciona todos os projetos
         if (error) { //caso erro:
             return res.status(500).send({ message: 'erro interno' }); //evia mensagem de erro
         }
@@ -228,7 +228,7 @@ app.post('/addpost/', function (req, res) {
                         const month = today.getMonth();
                         const year = today.getFullYear();
                         let data1 = year + '-' + (month + 1) + '-' + day; //data da postagem
-                        dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`) Values(?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo], function (error, results, fields) { //insere a postagem no banco de dados
+                        dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`,`proj`) Values(?,?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo, req.body.proj], function (error, results, fields) { //insere a postagem no banco de dados
                             if (error) { //caso haja erro:
                                 return res.send({ error: 'true', data: "Erro interno" }); //envia mensagem de erro
                             }
@@ -244,7 +244,7 @@ app.post('/addpost/', function (req, res) {
         })
     });
 });
-//adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão
+/*/adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão
 app.post('/addproj/', function (req, res) {
     let session_hash = req.body.session; //|recebe o hash da sessão
     var usuario_id;
@@ -289,7 +289,7 @@ app.post('/addproj/', function (req, res) {
         })
     });
 });
-
+*/
 //confirmar conta de usuário
 app.post('/confirmar/', function (req, res) {
     let acr = req.body.acr;
