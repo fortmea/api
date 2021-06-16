@@ -228,7 +228,7 @@ app.post('/addpost/', function (req, res) {
                         const month = today.getMonth();
                         const year = today.getFullYear();
                         let data1 = year + '-' + (month + 1) + '-' + day; //data da postagem
-                        dbConn.query("INSERT INTO `post`(`nome`,`conteudo`,`data`,`autor`,`resumo`,`proj`) Values(?,?,?,?,?,?)", [req.body.titulo, req.body.conteudo, data1, usuario_id, req.body.subtitulo, req.body.proj], function (error, results, fields) { //insere a postagem no banco de dados
+                        dbConn.query("INSERT INTO `post`(`conteudo`,`data`,`autor`,`proj`) Values(?,?,?,?)", [ req.body.conteudo, data1, usuario_id, req.body.proj], function (error, results, fields) { //insere a postagem no banco de dados
                             if (error) { //caso haja erro:
                                 return res.send({ error: 'true', data: "Erro interno" }); //envia mensagem de erro
                             }
