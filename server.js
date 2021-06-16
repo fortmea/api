@@ -138,7 +138,7 @@ app.post('/post/', function (req, res) {
 app.post('/uniquepost/', function (req, res) {
     console.log(req.body.id);
     if ((req.body.id != null) && (req.body.id != "")) {
-        dbConn.query('SELECT p.id as id, p.nome as nome, p.conteudo as conteudo, p.data as data, p.autor as autor, p.resumo, u.nome as username, u.image as userimage FROM post p INNER JOIN usuario u ON (u.id = p.autor)  WHERE id = ?', req.body.id, function (error, results, fields) { //seleciona todas as postagens
+        dbConn.query('SELECT p.id as id, p.nome as nome, p.conteudo as conteudo, p.data as data, p.autor as autor, p.resumo, u.nome as username, u.image as userimage FROM post p INNER JOIN usuario u ON (u.id = p.autor)  WHERE p.id = ?', req.body.id, function (error, results, fields) { //seleciona todas as postagens
             if (error) { //caso ocorra erro:
                 return res.status(500).send({ message: 'erro interno' }); //envia mensagem de erro
             }
