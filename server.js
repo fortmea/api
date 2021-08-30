@@ -17,12 +17,14 @@ const client = redis.createClient({
     host: redis_host, // replace with your hostanme or IP address
     password: redis_password, // replace with your password
 });
-
+var corsOptions = {
+    origin: 'https://'+website,
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }
+app.use(cors(corsOptions));
 const nodemailer = require('nodemailer');
-const session = require('express-session');
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.json({ limit: '25mb' }));
-app.use(cors());
 app.get('/', function (req, res) {
     return res.send({ error: true, message: 'hello' })
 });
