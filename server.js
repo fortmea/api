@@ -13,9 +13,9 @@ const email_pass = process.env.email_pass;
 const redis = require('redis');
 //const redisStore = require('connect-redis')(session);
 const client = redis.createClient({
-    port: 6379, // replace with your port
-    host: redis_host, // replace with your hostanme or IP address
-    password: redis_password, // replace with your password
+    port: 6379, 
+    host: redis_host, 
+    password: redis_password,
 });
 var corsOptions = {
     origin: 'https://'+website,
@@ -246,7 +246,7 @@ app.post('/addpost/', function (req, res) {
         })
     });
 });
-/*/adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão
+/*/adicionar projeto, função idêntica à /addpost, porem com suporte a link do projeto em questão. Desativado por não ser mais necessário.
 app.post('/addproj/', function (req, res) {
     let session_hash = req.body.session; //|recebe o hash da sessão
     var usuario_id;
